@@ -1,444 +1,157 @@
 # Spindle_dynamics_toolbox
-This is the MATLAB toolbox repository accompanying the spindle temporal dynamics paper (Chen et al., PNAS, 2025).
-### Please cite the following paper when using this toolbox
-> Shuqiang Chen, Mingjian He, Ritchie E. Brown, Uri T. Eden, and Michael J. Prerau*. Individualized temporal patterns drive human sleep spindle timing, Proc. Natl. Acad. Sci. U.S.A.
-122 (2) e2405276121, https://doi.org/10.1073/pnas.2405276121 (2025).
---- 
 
-## Initial Clone 
+MATLAB toolbox accompanying **Chen et al., *PNAS* 2025** on the temporal dynamics of human sleep spindles. It lets you detect spindles as time-frequency peaks, then fit a point-process generalized-linear-model (GLM) that jointly captures multiple factors influencing moment-to-moment spindle occurrence:
 
-To clone the Spindle_dynamics_toolbox.git repository to your own computer or remote work station, start by creating a directory for it. Then, within that directory in your terminal, run the clone command.
- 
- #### 1. create an empty folder:
-	mkdir Spindle_dynamics_toolbox
+- **Sleep stage** (discrete N2 / N3)
+- **Slow-oscillation (SO) power** — a continuous measure of sleep depth
+- **Slow-oscillation (SO) phase** — cortical up/down state
+- **Spindle history** — the timing of previous spindles (short-term and infraslow)
 
- #### 2. clone the repository to the folder you created:
-	git clone git@github.com:preraulab/Spindle_dynamics_toolbox.git Spindle_dynamics_toolbox
+The key finding of the paper: **short-term timing patterns are the dominant determinant of spindle timing**, more so than sleep depth or cortical up/down state. Each subject has a near-fingerprint-like refractory + excitatory structure (typical peaks: ~1.8 s refractory period, ~2.9 s excitatory period, peak at ~3.5 s post-spindle), with variability increasing over age.
 
-## Pre-Run Setup and Notes
+## Please cite the paper when using this toolbox
 
-#### 1. Required MATLAB toolboxes for this repository
-To run this repository, the following MATLAB toolboxes must be installed:  
+> Shuqiang Chen, Mingjian He, Ritchie E. Brown, Uri T. Eden, Michael J. Prerau.
+> "Individualized temporal patterns drive human sleep spindle timing."
+> *Proceedings of the National Academy of Sciences*, 122(2): e2405276121 (2025).
+> doi: [10.1073/pnas.2405276121](https://doi.org/10.1073/pnas.2405276121)
 
-- Signal Processing Toolbox
-- Statistics and Machine Learning Toolbox
-- Parallel Computing Toolbox 
+A machine-readable citation is in [`CITATION.cff`](CITATION.cff) — GitHub's "Cite this repository" button uses it.
 
-To install the toolboxes above, in MATLAB, HOME->Add-Ons->Get Add-Ons. Detailed instructions can be found [here](https://www.mathworks.com/help/matlab/matlab_env/get-add-ons.html).
+## What's in the toolbox
 
-#### 2. Possible Security & Privacy Issues
-This repository includes '.mex' files to enable fast execution of the multitaper spectrogram. macOS may block execution due to user's security settings. If you see a security warning window pop up like:  
-> *"multitaper_spectrogram_coder_mex.... not opened ..."*  
+| Component | What it does |
+|---|---|
+| `Example_Script.m` | End-to-end example: loads example data, detects spindles, fits GLM, plots the history effect and phase preferences |
+| `quick_start.m` | Minimal runnable template for applying the pipeline to your own data |
+| `helper_function/TFsigma_peak_detector/` | Time-frequency peak detection in the sigma band (12–16 Hz) — spindle detector |
+| `helper_function/multitaper/` | Multitaper spectrogram (shipped, MEX-accelerated) |
+| `helper_function/major_function/` | GLM deviance / model-comparison / plotting routines (KS plots, history-curve plot, phase-preference plots) |
+| `helper_function/utils/` | Design-matrix builders, spectral power extractors, colorbar / scale helpers |
 
-Follow these steps to allow execution:  
-
-1. Go to **System Settings → Privacy & Security**.  
-2. Scroll down and look for a message indicating that the MEX file was blocked.  
-3. Click **"Allow Anyway"**
-4. **Restart** MATLAB.
-   
-Details of multitaper spectrogram can be found [here](https://github.com/preraulab/multitaper_toolbox/tree/master?tab=readme-ov-file#matlab-implementation). 
-
- --- 
-
-## Table of Contents
-* [Background and Toolbox Overview](#background-and-toolbox-overview)
-* [Quick Start](#quick-start)
-* [Raw Data to Model Fitting](#raw-data-to-model-fitting)
-* [Model Results And Visualizations](#model-results-and-visualizations)
-* [Repository Structure](#repository-structure)
-* [Citations](#citations)
-* [Status](#status)
-
-<br/>
-
-## Background and Toolbox Overview
-
-Sleep spindles are cortical electrical waveforms observed during sleep, considered critical for memory consolidation and sleep stability. Abnormalities in sleep spindles have been found in neuropsychiatric disorders and aging and suggested to contribute to functional deficits. Numerous studies have demonstrated that spindle activity dynamically and continuously evolves over time and is mediated by a variety of intrinsic and extrinsic factors including sleep stage, slow oscillation (SO) activity (0.5 – 1.5 Hz), and infraslow activity. Despite these known dynamics, the relative influences on the moment-to-moment likelihood of a spindle event occurring at a specific time are not well-characterized. Moreover, standard analyses almost universally report average spindle rate (known as spindle density) over fixed stages or time periods—thus ignoring timing patterns completely. Without a systematic characterization of spindle dynamics, our ability to identify biomarkers for aging and disordered conditions remains critically limited.
-
-Using a rigorous statistical framework, we demonstrate that short-term timing patterns are the dominant determinant of spindle timing, whereas sleep depth, cortical up/down-state, and long-term (infraslow) pattern, features thought to be primary drivers of spindle occurrence, are less important. We also show that these short-term timing patterns are fingerprint-like and show increased variability over age. This study provides a new lens on spindle production mechanisms, which will allow studies of the role of spindle timing patterns in memory consolidation, aging, and disease.
-
-<h3>Toolbox Overview</h3>
-<p>
-    Here, we provide this code toolbox to implement this integrated framework to characterizing <strong>instantaneous spindle temporal dynamics</strong> influenced by multiple factors, including sleep stage/depth (SO Power), cortical up/down states (SO Phase), and the past history of spindles. It consists of <strong>two major components:</strong>
-</p>
-
-<h4>1. Quick Start GUI</h4>
-<ul>
-    <li>
-        Provides an interactive interface for users to explore data and create basic visualizations:
-        <ul>
-            <li>Load example data or upload their own data.</li>
-            <li>Specify model factors and add interactions between them.</li>
-            <li>Customize settings to generate an overview figure.</li>
-        </ul>
-    </li>
-</ul>
-
-<h4>2. Step-by-Step Example Script</h4>
-<ul>
-    <li>
-        Offers researchers a detailed workflow to:
-        <ul>
-            <li>Dive into the toolbox's functionalities.</li>
-            <li>Address specific scientific questions using example data or their own data.</li>
-        </ul>
-    </li>
-</ul>
-
-<p>
-    Designed as a user-friendly toolbox, we aim to:
-</p>
-<ul>
-    <li>Streamline research workflows.</li>
-    <li>Ensure reproducibility.</li>
-    <li>Inspire researchers to apply and adapt it to diverse datasets for broader applications.</li>
-</ul>
-
-
-## Quick Start
-After installing the package, execute the "quick_start" GUI function in MATLAB command line to get started
-
-``` matlab
- > quick_start;
-```
-
-The following GUI should be generated (shown below, left panel):
-
-<p align="center">
-<img src="https://github.com/preraulab/Spindle_dynamics_toolbox/blob/master/image_folder/GUI2.png" width="700" />
-</p> 
-<p align="center">
-  <b> Quick Start GUI </b>
-</p>
-
-Let's follow the 4 steps to make the choices. Here, we provide an example of the settings (shown above, right panel), which specifies the model we primarily used in the paper:
-
-<ol>
-    <li>Load data: Load <a href="https://github.com/preraulab/Spindle_dynamics_toolbox/tree/master/example_data" target="_blank">Example Data</a>, which is the same <a href="https://www.sleepdata.org/datasets/mesa" target="_blank">MESA</a> subject as in Figure 6 from the paper.</li>
-    <li>Select factors: Click on "Stage", "SOphase","History". </li>
-    <li>Choose history: Click on "Long-term (90 sec)"</li>
-    <li>Select interactions: Choose "stage:SOphase interaction"</li>
-</ol>
-
-Once you clicked on "Run the Model" button, an overview figure will be generated for users to explore (shown below):
-
-<p id="overview-figure" align="center">
-<img src="https://github.com/preraulab/Spindle_dynamics_toolbox/blob/master/image_folder/overview_fig.png" width="900" />
-</p> 
-<p align="center">
-  <b> Overview of the spindle dynamics </b>
-</p>
-
-Use the scrollzoompan interface to slide and play around with the figure. To view the exact same epoch, set **Zoom** to be **90** and **Pan** to be **30145**.
-
-#### To load your own data
-Click on "Load User Data", it allows you to browse and load your own data. Ensure your data file meets the following requirements:
-
-1. **File format**:
-   - The file must be a `.mat` file (MATLAB file format).
-
-2. **Required variables in the file**:
-   - The `.mat` file must contain all the 4 variables (variable names are case-insensitive): 
-     - **`EEG`**: (double,1D vector) raw EEG data. Other accepted names: `eeg_data`, `raw_EEG`,`data`  	 
-     - **`Fs`**: (double,scalar) Sampling frequency of the EEG data in Hz. Other accepted names: `sampling_rate`  
-     - **`stage_val`**: (double,1D vector) Sleep stages(1: N3; 2: N2; 3:N1; 4:REM; 5:Wake). Other accepted names: `stage_vals`, `stages`,`stage`,`stageval`,`stagevals`
-     - **`stage_time`**: (double,1D vector) Corresponding times for the sleep stages in sec. Other accepted names: `stage_t`, `time_stages`,`stage_t`,`stage_times`
-       
-
-## Raw Data to Model Fitting
-In this section, we will walk through the data loading, preprocessing, model specification, and model fitting steps in the example script, highlighting the major functions. To run everything and generate all figures with a single command, simply execute the example script:
-
-``` matlab
- > example_script;
-```
-
-### Model Specification
-The `specify_mdl` consolidates all model specifications provided by users, including the model factors (`BinarySelect`), interactions to include(`InteractSelect`), and other additional options. These specifications are returned as a structured array (`ModelSpec`). 
-
-Usage:
-``` matlab
-[ModelSpec] = specify_mdl(BinarySelect,InteractSelect,'hist_choice',hist_choice,'control_pt',control_pt);
-```
-
-``` matlab
-% Input:
-%       <Required inputs>
-%       - BinarySelect: (1x4 vector, double), indicates which factors are selected by the user
-%         Factors are with fixed order: SOphase, stage, SOpower,history
-%         e.g., [1,1,0,1] means select SOphase, stage, and history as model components 
-%       - InteractSelect: (1xn cell), each entry contains an interaction term in the form of A:B 
-%         It is case,order-insensitive, and accept multipler separators including:':', '&', and '-'
-%         n is the number of interactions. For example, we can add 2 interactions
-%         e.g., {'stage:SOphase', 'stage:history'} 
-%
-%       <Optional inputs>
-%       - hist_choice: (string), it is either 'short'(default) or 'long'
-%                   'short': Short term history (up to 15 secs, this option runs fast)
-%                   'long': Long term history (up to 90 secs, use this to show infraslow structure)
-%       - control_pt: (1xk vector,double), spline control point location, k is the number of control points
-%                    default: [0:15:90 120 150]
-%       - binsize: (double), point process bin size in sec, default: 0.1 sec
-%       - hard_cutoffs:(1x2 vector,double), frequency cutoff in Hz
-%                      default:[12 16], choose events in 12 to 16 Hz as fast spindles
-%       
-% Output:
-%       ModelSpec: A struct that contains all model specifications
-%
-% Example 1: BinarySelect = [1,1,0,1];                     
-%            InteractSelect = {'stage:SOphase'};          
-%            [ModelSpec] = specify_mdl_factor(BinarySelect,InteractSelect);
-```
-
-
-### Data Preprocessing
-The `preprocessToDesignMatrix` function extracts spindle event information (`res_table`), saves preprocessed binned data (`BinData`), and design matrix (`X`) for model fitting.
-
-Usage:
-``` matlab
-[X, BinData,res_table] = preprocessToDesignMatrix(EEG, Fs, stage_val, stage_time,ModelSpec);
-```
-
-``` matlab
-% Input(All Required):
-%       - EEG: (double, 1D), raw EEG data              
-%       - Fs: (double, scalar), sampling frequency in Hz   
-%       - stage_val: (double, 1D), stage values 
-%                   where 1,2,3,4,5 represent N3,N2,N1,REM,and Wake
-%       - stage_time:(double, 1D), corresponding time of the stage
-%       - ModelSpec: A struct that contains all model specifications
-%
-% Output: 
-%       - X (double, matrix): Design Matrix, the size depends on data length and ModelSpec
-%       - BinData (struct): A struct that has all data saved in binsize 
-%       - res_table: (table) All event info and signals to use. Key components include:
-%           -- peak_ctimes: (cell), detected event central times (s)
-%           -- peak_freqs: (cell), detected event frequency (Hz)
-%           -- SOpow: (cell), slow oscillation power
-%           -- SOphase: (cell), slow oscillation phase
-```
-### Model Fitting
-In Matlab, `glmfit` function is applied to fit the point process - GLM model.
-
-Usage:
-```
-[b, dev, stats] = glmfit(X,y,'poisson');
-```
-
-``` matlab
-% Input:
-%       - X: (double, matrix), design Matrix, the size depends on data length and ModelSpec
-%       - y: (double, 1D), response, or point process binary train
-%       - 'poisson': (string),  specified distribution 
-%
-% Output: 
-%       - b: (double, 1D), fitted parameters
-%       - dev: (double, scalar), deviance of the model
-%       - stats: a Matlab struct that contains all the information of the model fitting result, including coefficient estimates (b), covariance matrix for b, p-values for b, residuals, etc.
-```
-
-
-## Model Results And Visualizations
-In this section, we will walk through results part in the example script, highlighting the major functions. 
-
-### 1. History Modulation Curve 
-The history modulation curve estimates a multiplicative modulation of the spindle event rate due to a prior event at any given time lag, which answers the question: How much more likely is there to be a spindle event, given that an event was observed X seconds ago? Using the [plot_hist_curve.m](https://github.com/preraulab/Spindle_dynamics_toolbox/blob/master/helper_function/major_function/plot_hist_curve.m) function, we can plot the history modulation curve and save history features including refractory period, excitatory period, peak time, peak height, and infraslow multiplier. 
-
-Usage:
-``` matlab
-  [xlag,yhat,yu,yl,hist_features] = plot_hist_curve(stats,ModelSpec,BinData)
-```
-Here are the function inputs and outputs:
-
-``` matlab
-% Input:
-%       -stats (struct), results after model fitting 
-%       -ModelSpec (struct), model specifications
-%       -BinData, (struct), binned data
-%
-% Output:
-%       -xlag (n x 1 vector), history time lag in sec
-%       -yhat (n x k vector), history modulation value
-%       -yu (n x k vector), history curve 95% confidence interval (upper)
-%       -yl (n x k vector), history curve 95% confidence interval (lower)
-%       Note: k = 1 when single history curve is computed
-%             k = 2 when N2 and N3 history curve are computed, 
-%               in which case, 1st col means N2 history, 2nd col means N3 history
-%             n is determined by history lag and sp_resol (n = history lag in bin / sp_resol)
-%       -hist_features (struct), it contains all history features, including
-%          --ref_period: refractory period (s)
-%          --exc_period: excited period(s)
-%          --p_time: peak time (s)
-%          --p_height: peak height
-%          --AUC_is: The infraslow multiplier. Area under infraslow period (40s to 70s) / 30
-%	-A history modulation figure
-```
-
-<p align="center">
-<img src="https://github.com/preraulab/Spindle_dynamics_toolbox/blob/master/image_folder/hist_fig1.png" width="800" />
-</p> 
-<p align="center">
-  <b>Figure 1: History Modulation Curve </b>
-</p>
-
-We observe that history modulation begins with a refractory period, during which spindles are less likely to occur. It then ramps up to a peak within an excitatory period, where spindle occurrence is most likely, before gradually decreasing back to 1, suggesting minimal modulation for events that occurred a long time ago. Here we show the Figure 2 in the paper for illustration purpose, but check the <a href="#overview-figure">Overview of the spindle dynamics</a> figure for the history curve of this example subject.
-
-### 2. Spindle Preferential SO Phase Shifts With Sleep Depth
-Sleep spindles have been widely reported to preferentially occur in the cortical up state. Here we show the preferred phase shifts with sleep depth for this example subject. Use the [plot_stage_prefphase.m](https://github.com/preraulab/Spindle_dynamics_toolbox/blob/master/helper_function/major_function/plot_stage_prefphase.m) function to visualize how preferred phase shifts with sleep stage.
-
-Usage:
-``` matlab
-  [pp,pp_CI] = plot_stage_prefphase(b,stats,ModelSpec)
-```
-
-Here are the function inputs and outputs:
-
-``` matlab
-% Input:
-%       -b (double), fitted model parameters 
-%       -stats (struct), all results after model fitting 
-%       -ModelSpec (struct), model specifications
-%
-% Output:
-%       -A figure that shows how preferred phase changes with sleep stage
-%       -pp (3x1,double), preferred phase (rad) for N1, N2, and N3 stage
-%       -pp_CI (3x2,double), 95% CI for preferred phase in N1, N2, and N3 stage
-%                           1st column (lower bound for each stage)
-%                           2nd column (upper bound for each stage)
-```
-
-Use the [plot_sop_prefphase.m](https://github.com/preraulab/Spindle_dynamics_toolbox/blob/master/helper_function/major_function/plot_sop_prefphase.m) function to visualize how preferred phase shifts with with SOP (continuous sleep depth).
-
-``` matlab
-  [phi0,sop0,sop_pp_mat] = plot_sop_prefphase(b,stats,ModelSpec)
-```
-Here are the function inputs and outputs:
-
-``` matlab
-% Input:
-%       -b (double), fitted model parameters 
-%       -stats (struct), all results after model fitting 
-%       -ModelSpec (struct), model specifications
-%
-% Output:
-%       -A figure that shows how preferred phase changes with continuous SOP
-%       -phi0 (500x1, double), phase stamps for evaluation, 500 evenly spaced points from -pi to pi 
-%       -sop0 (510x1,double), SOP stamps for evaluation, 510 evenly spaced points from -5 to 30
-%       -sop_pp_mat (510x500 matrix,double), spindle rate heatmap as a function of (phi0,sop), 
-%                                            in unit of events per binsize
-```
-
-<p align="center">
-<img src="https://github.com/preraulab/Spindle_dynamics_toolbox/blob/master/image_folder/ppshift_fig2.png" width="900" />
-</p> 
-<p align="center">
-  <b>Figure 2: Phase Shift: Stage vs. SO Power </b>
-</p>
-
-We see spindles tend to occur in SO peak (phase ~0) during light sleep, and the preferred phase shifts earlier to the SO rising phase in deeper sleep, for this participant.
-
-### 3. Model With History Greatly Improves Model Performance
-
-If the model is correct, the time-rescaling theorem can be used to remap the event times into a homogenous Poisson process. After rescaling, Kolmogorov-Smirnov (KS) plots can be used to compare the distribution of inter-spindle-intervals to those predicted by the model. A well-fit model will produce a KS plot that closely follows a 45-degree line and stays within its significance bounds (black). KS plots that are not contained in these bounds (red) suggest lack-of-fit in the model. Use the [KSplot.m](https://github.com/preraulab/Spindle_dynamics_toolbox/blob/master/helper_function/major_function/KSplot.m) function to generate the KS plot, compute KS statistics, and output KS test results.
-
-Usage:
-``` matlab
-  [ks,ksT] = KSplot(CIF,y,ploton);
-```
-Here are the function inputs and outputs:
-
-``` matlab
-% Input:
-%       - CIF (double), conditional intensity function
-%       - y (double), binary event train
-%       - ploton (double), output KS plot if ploton is 1 
-% Output:
-%       - A KS plot
-%       - ks: KS statistic
-%       - ksT: KS test result, 0 means pass the KS test
-%                              1 means fail to pass the KS test
-```
-
-<p align="center">
-<img src="https://github.com/preraulab/Spindle_dynamics_toolbox/blob/master/image_folder/ks_fig3.png" width="900" />
-</p> 
-<p align="center">
-  <b>Figure 3: KS plot for models with different components </b>
-</p>
-
-We observe that the model with the stage or phase factor does not pass the KS test. However, the model with a single history component passes the KS test, and the KS statistic is even smaller in the model with all factors.
-
-### 4. Short-Term History Contributes the Most to Statistical Deviance, Surpassing Other Factors
-The modeling framework allows us to quantitatively compare the relative contributions of these factors through deviance analysis, which is the point process equivalent of an analysis of model variance in linear regression. Use the [compute_dev_exp.m](https://github.com/preraulab/Spindle_dynamics_toolbox/blob/master/helper_function/major_function/compute_dev_exp.m) function to compute proportional deviance explained by each factor.
-
-Usage:
-``` matlab
- [dev_exp_sta,dev_exp_sop] = compute_dev_exp(BinData)
-```
-Here are the function inputs and outputs:
-
-``` matlab
-% Input: BinData (struct), all the binned data
-%       
-% Output: 
-%       - dev_exp_sta (double,1x3), deviance explained from [stage, phase, history]
-%       - dev_exp_sop (double,1x3), deviance explained from [SOP, phase, history]
-```
-
-<p align="center">
-<img src="https://github.com/preraulab/Spindle_dynamics_toolbox/blob/master/image_folder/dev_exp_fig4.png" width="400" />
-</p> 
-<p align="center">
-  <b>Figure 4: Proportional Deviance Explained By Different Factors </b>
-</p>
-
-From the table above, we see that the history component explains the most deviance, surpassing other factors such as sleep stage and SO phase.
-
-
-## Repository Structure
-The contents of the "toolbox" folder is organized as follows, with key functions:
+## Pipeline overview
 
 ```
-.REPO_ROOT
-├── quick_start.m:         Quick start GUI to generate an overview figure to allow users to explore
-├── Example_Script.m:      Main script, from raw data to model results and visulizations
-│                          Uses example data contained in example_data folder.│   
-├── example_data/  Contains example data
-├── image_folder/  Contains all saved figures
-└── helper_function/  Contains all helper functions and toolboxes
-    ├── major_function/   
-    │         - specify_mdl.m: Model specifications
-    │         - preprocessToDesignMatrix.m: Data preprocessing 
-    │         - plot_hist_curve.m: History modulation curve
-    │         - plot_stage_prefphase.m: SO preferred phase as a function of sleep stage
-    │         - plot_sop_prefphase.m: SO preferred phase as a function of SO power
-    │         - KSplot.m: KS statistics, plot, and test
-    │         - compute_dev_exp.m: Proportional deviance explained for each factor
-    ├── TFsigma_peak_detector/ Contains the spindle detection algorithm
-    │ 
-    ├── multitaper/ The multitaper spectrogram toolbox
-    │       
-    └── utils/	Contains various utility functions
-        
-
+       EEG (polysomnography)
+                │
+                ▼
+  ┌──────────────────────────────┐
+  │  Multitaper spectrogram      │  multitaper_spectrogram (MEX)
+  └──────────────┬───────────────┘
+                 ▼
+  ┌──────────────────────────────┐
+  │  TF-sigma peak detection     │  extract_*.m, find_frequency_peaks
+  │  12–16 Hz peaks → spindles   │
+  └──────────────┬───────────────┘
+                 ▼
+  ┌──────────────────────────────┐
+  │  Covariates                  │
+  │    • sleep stage             │  (discrete)
+  │    • SO power                │  (continuous; compute_mtspect_power)
+  │    • SO phase                │  (0 – 2π; cortical up/down state)
+  │    • spindle history         │  (past spindle times; build_design_mt)
+  └──────────────┬───────────────┘
+                 ▼
+  ┌──────────────────────────────┐
+  │  Point-process GLM           │  conditional-intensity regression
+  │  λ(t | covariates, history)  │  (MATLAB glmfit / fitglm)
+  └──────────────┬───────────────┘
+                 ▼
+  ┌──────────────────────────────┐
+  │  Analysis & visualization    │
+  │    • KS plot (goodness-of-fit)│  KSplot
+  │    • history curve            │  plot_hist_curve
+  │    • SO-phase preference      │  plot_sop_prefphase
+  │    • stage × phase preference │  plot_stage_prefphase
+  │    • deviance explained       │  compute_dev_exp
+  └──────────────────────────────┘
 ```
 
+## Install
 
-## Citations
-The code contained in this repository is companion to the paper:  
->  Shuqiang Chen, Mingjian He, Ritchie E. Brown, Uri T. Eden, and Michael J. Prerau*. Individualized temporal patterns drive human sleep spindle timing, Proc. Natl. Acad. Sci. U.S.A.
-122 (2) e2405276121, https://doi.org/10.1073/pnas.2405276121 (2025).
+```bash
+git clone https://github.com/preraulab/Spindle_dynamics_toolbox.git
+cd Spindle_dynamics_toolbox
+```
 
-which should be cited for all use.  
+In MATLAB:
 
-<br/>
-<br/>
+```matlab
+addpath(genpath('/path/to/Spindle_dynamics_toolbox'));
+```
 
-## Status
+## Required MATLAB toolboxes
 
-All implementations are functional, but are subject to refine. Next optimization, deal with perfect predictors (e.g., Wake and REM) to save runtime.
-<br/>
-Last updated by Shuqiang Chen, 02/11/2025
-<br/>
-For questions or suggestions please email Shuqiang Chen at shuqiang@bu.edu
+- **Signal Processing Toolbox**
+- **Statistics and Machine Learning Toolbox** (for `glmfit` / `fitglm`)
+- **Parallel Computing Toolbox** (optional, for speed in the TF-peak detector)
 
+## Running the demo
+
+```matlab
+Example_Script
+```
+
+Runs the full pipeline on example data included under `example_data/`. Produces the figures from the paper (spindle train, conditional-intensity estimates per model variant, history curve, SO-phase preference plots).
+
+For your own data: start from `quick_start.m` and substitute your EEG + scoring.
+
+## Security warning on macOS
+
+The toolbox ships pre-built MEX files for the multitaper spectrogram. On modern macOS, Apple's Gatekeeper may block execution:
+
+> *"multitaper_spectrogram_coder_mex.... not opened ..."*
+
+Fix:
+
+1. **System Settings → Privacy & Security**
+2. Scroll to the blocked-MEX notice
+3. Click **Allow Anyway**
+4. Restart MATLAB
+
+See the upstream [multitaper_toolbox](https://github.com/preraulab/multitaper_toolbox) for details on the multitaper implementation.
+
+## Key model details
+
+### Point-process GLM framework
+
+Spindles are treated as a marked point process. The conditional intensity function λ(t | History, Covariates) gives the instantaneous spindle rate given past spindle times and covariate values. For each participant, we fit:
+
+```
+log λ(t) = β₀ + β_stage · stage(t) + β_SOP · SOP(t) + β_SOφ · f(SO_phase(t)) + β_hist · h(history(t))
+```
+
+where `f(SO_phase)` and `h(history)` are basis expansions (spline / indicator functions).
+
+### History effect interpretation
+
+The history function `h(·)` reveals each participant's characteristic timing structure:
+
+- **Refractory period** — regions where `exp(β_hist · h(τ)) < 1` (suppressed spindle rate at lag τ relative to baseline)
+- **Excitatory period** — regions where `exp(β_hist · h(τ)) > 1` (elevated spindle rate at lag τ)
+- **Infraslow clustering** — extending the history window to ~90 s reveals a secondary bump around ~55 s in some participants
+
+### Goodness-of-fit
+
+Use the **Kolmogorov-Smirnov plot** (`KSplot.m`) — after time-rescaling under the fitted model, inter-spindle intervals should be uniformly distributed. Deviations from the KS confidence bands indicate model misspecification.
+
+### Model comparison
+
+Use `compute_dev_exp.m` to compare nested models (e.g., stage-only vs stage+SOP vs stage+SOP+SO_phase vs stage+SOP+SO_phase+history). The paper demonstrates that adding the history term produces by far the largest deviance-explained improvement.
+
+## Datasets used in the paper
+
+1. **Wamsley et al.** — 17 healthy controls (ages 26–45), two-night recordings
+2. **MESA** (Multi-Ethnic Study of Atherosclerosis) — 1,008 participants, single-night recordings
+   - Middle-aged group: 433 participants (ages 54–65)
+   - Older group: 575 participants (ages 66–94)
+
+Both datasets are external — the `example_data/` folder provides a small single-subject demo for getting started.
+
+## Documentation
+
+Full API reference: **https://preraulab.github.io/Spindle_dynamics_toolbox/**
+
+## License
+
+BSD 3-Clause. See [`LICENSE`](LICENSE).
