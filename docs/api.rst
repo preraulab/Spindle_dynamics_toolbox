@@ -4,48 +4,88 @@ API Reference
 Entry points
 ------------
 
-.. mat:module:: .
+.. toctree::
+   :maxdepth: 1
 
-.. mat:autofunction:: Example_Script
-.. mat:autofunction:: quick_start
+   api/Example_Script
+   api/quick_start
 
 Major analysis functions
 ------------------------
 
-.. mat:module:: helper_function.major_function
+.. toctree::
+   :maxdepth: 1
 
-.. mat:autofunction:: compute_dev_exp
-.. mat:autofunction:: KSplot
-.. mat:autofunction:: plot_hist_curve
-.. mat:autofunction:: plot_sop_prefphase
-.. mat:autofunction:: plot_stage_prefphase
+   api/compute_dev_exp
+   api/KSplot
+   api/plot_hist_curve
+   api/plot_sop_prefphase
+   api/plot_stage_prefphase
+   api/preprocessToDesignMatrix
+   api/specify_mdl
 
 TF-sigma peak detector
 ----------------------
 
-.. mat:module:: helper_function.TFsigma_peak_detector
+.. toctree::
+   :maxdepth: 1
 
-.. mat:autofunction:: extract_density_curve
-.. mat:autofunction:: extract_event_centroid
-.. mat:autofunction:: extract_freq_clusters
-.. mat:autofunction:: extract_maxfreq_peaks
-.. mat:autofunction:: find_frequency_peaks
+   api/TF_peak_detection
+   api/TF_peak_selection
+   api/extract_density_curve
+   api/extract_event_centroid
+   api/extract_freq_clusters
+   api/extract_maxfreq_peaks
+   api/find_frequency_peaks
+   api/find_time_peaks
+   api/findpeaks_extents_fpeaks
+   api/select_signal_TFpeaks
 
 Multitaper spectrogram
 ----------------------
 
-.. mat:module:: helper_function.multitaper
+.. toctree::
+   :maxdepth: 1
 
-.. mat:autofunction:: multitaper_spectrogram
-.. mat:autofunction:: multitaper_spectrum
+   api/multitaper_spectrogram
+   api/multitaper_spectrogram_mex
+   api/multitaper_spectrum
+   api/multitaper_spectrum_mex
 
 Utilities
 ---------
 
-.. mat:module:: helper_function.utils
+.. toctree::
+   :maxdepth: 1
 
-.. mat:autofunction:: build_design_mt
-.. mat:autofunction:: climscale
-.. mat:autofunction:: colorbar_noresize
-.. mat:autofunction:: compute_hist_features
-.. mat:autofunction:: compute_mtspect_power
+   api/build_design_mt
+   api/climscale
+   api/colorbar_noresize
+   api/compute_SOP
+   api/compute_hist_features
+   api/compute_mtspect_power
+   api/compute_stage_prob
+   api/consecutive_runs
+   api/detect_artifacts
+   api/eegToEventSignal
+   api/figdesign
+   api/findpeaks_extents
+   api/FinerModCardinalSpline
+   api/get_chunks
+   api/Hist
+   api/hypnoplot
+   api/ismember_interaction
+   api/ModifiedCardinalSpline
+   api/nanpow2db
+   api/nanzscore
+   api/phasehistogram
+   api/plotcos
+   api/rainbow4
+   api/RawPhase2BinPhase
+   api/rawToBinData
+   api/scaleline
+   api/scrollzoompan
+   api/shadebounds
+   api/stageraw2bin
+   api/viridis
+
