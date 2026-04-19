@@ -1,0 +1,46 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the associated paper (see preferred-citation)."
+title: "Spindle_dynamics_toolbox"
+abstract: "MATLAB toolbox accompanying Chen et al. 2025 PNAS — individualized temporal patterns driving human sleep spindle timing."
+authors:
+  - family-names: Chen
+    given-names: Shuqiang
+    affiliation: "Prerau Laboratory, Brigham and Women's Hospital, Harvard Medical School"
+  - family-names: He
+    given-names: Mingjian
+    affiliation: "Prerau Laboratory, Brigham and Women's Hospital, Harvard Medical School"
+    orcid: "https://orcid.org/0000-0002-6688-8693"
+  - family-names: Prerau
+    given-names: Michael J.
+    name-suffix: Ph.D.
+    affiliation: "Prerau Laboratory, Brigham and Women's Hospital, Harvard Medical School"
+    orcid: "https://orcid.org/0000-0002-9010-5273"
+type: software
+license: BSD-3-Clause
+url: "https://github.com/preraulab/Spindle_dynamics_toolbox"
+repository-code: "https://github.com/preraulab/Spindle_dynamics_toolbox"
+preferred-citation:
+  type: article
+  title: "Individualized temporal patterns drive human sleep spindle timing"
+  authors:
+    - family-names: Chen
+      given-names: Shuqiang
+    - family-names: He
+      given-names: Mingjian
+      orcid: "https://orcid.org/0000-0002-6688-8693"
+    - family-names: Brown
+      given-names: Ritchie E.
+      orcid: "https://orcid.org/0000-0002-7164-4132"
+    - family-names: Eden
+      given-names: Uri T.
+      orcid: "https://orcid.org/0000-0002-2058-3691"
+    - family-names: Prerau
+      given-names: Michael J.
+      orcid: "https://orcid.org/0000-0002-9010-5273"
+  journal: "Proceedings of the National Academy of Sciences"
+  volume: 122
+  issue: 2
+  start: "e2405276121"
+  year: 2025
+  doi: "10.1073/pnas.2405276121"
+  url: "https://doi.org/10.1073/pnas.2405276121"
