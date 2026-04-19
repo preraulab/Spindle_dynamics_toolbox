@@ -1,35 +1,28 @@
 function [run_lengths, run_inds, run_values, filtered_vector] = get_chunks(data, min_len, max_len)
-% GET_CHUNKS Extract consecutive runs of equal values from a vector
+%GET_CHUNKS  Extract consecutive runs of equal values from a vector
 %
-% [run_lengths, run_inds, run_values, filtered_vector] = GET_CHUNKS(data, min_len, max_len)
+%   Usage:
+%       [run_lengths, run_inds, run_values, filtered_vector] = get_chunks(data, min_len, max_len)
 %
-% Inputs:
-% - data: a vector.
-% - min_len: minimum length of consecutive runs.
-% - max_len: maximum length of consecutive runs.
+%   Inputs:
+%       data    : 1xN vector - input data -- required
+%       min_len : integer - minimum run length (default: 1)
+%       max_len : integer - maximum run length (default: inf)
 %
-% Outputs:
-% - run_lengths: vector containing the length of each consecutive run.
-% - run_inds: cell array containing the start and end indices of each consecutive run.
-% - run_values: the value of each run
-% - filtered_vector: binary vector with ones at the positions of the extracted
-% consecutive runs.
+%   Outputs:
+%       run_lengths     : 1xR integer - length of each selected run
+%       run_inds        : 1xR cell - start/end indices of each selected run
+%       run_values      : 1xR - value of each run
+%       filtered_vector : 1xN double - binary vector with ones at kept-run positions
 %
-% If min_len and max_len are not specified, all consecutive runs of the
-% specified value are returned. If only min_len is specified, all runs of
-% length min_len or longer are returned. If both min_len and max_len are
-% specified, runs with length between min_len and max_len (inclusive) are
-% returned.
+%   Example:
+%       x = [2 2 5 5 5 6 6 6 6 4 7 2 2 2];
+%       [lengths, runs] = get_chunks(x, 2, 4);
+%       % lengths = [2 3 4 3], runs = {[1 2],[3 4 5],[6 7 8 9],[12 13 14]}
 %
+%   See also: consecutive_runs
 %
-% Examples:
-%   x = [2 2 5 5 5 6 6 6 6 4 7 2 2 2];
-%   [lengths, runs] = get_chunks(x, 2, 4)
-%
-%   % returns lengths = [2 3 4 3] and run_inds =  {[1 2]} {[3 4 5]} {[6 7 8 9]} {[12 13 14]}.
-%
-%    Copyright 2024 Michael J. Prerau Laboratory. - http://www.sleepEEG.org
-%    Authors: Michael J. Prerau
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %Default lengths impose no filtering
 if nargin<2

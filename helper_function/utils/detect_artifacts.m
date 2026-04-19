@@ -1,38 +1,41 @@
 function [ artifacts ] = detect_artifacts(data, Fs, varargin)
-%DETECT_ARTIFACTS  Detect artifacts in the time domain by iteratively removing data above a given z-score criterion
+%DETECT_ARTIFACTS  Detect artifacts in time-domain EEG by iteratively removing high-z segments in HF and broadband channels
 %
 %   Usage:
-%   Direct input:
-%   artifacts = detect_artifacts(data, Fs, crit_units, hf_crit, hf_pass, bb_crit, bb_pass, smooth_duration, ...
-%                                            verbose, histogram_plot, return_filts_only, hpFilt_high, hpFilt_broad, detrend_duration)
+%       artifacts = detect_artifacts(data, Fs, 'Name', Value, ...)
 %
-%   Input:
-%   data: 1 x <number of samples> vector - time series data-- required
-%   Fs: double - sampling frequency in Hz  -- required
-%   isexcluded: logical array - boolean for time points to be excluded when updating thresholds (default: all false)
-%   crit_units: string 'std' to use iterative crit_units (default) or a strict threshold on 'MAD',defined as K*MEDIAN(ABS(A-MEDIAN(A)))
-%   hf_crit: double - high frequency criterion - number of stds/MAD above the mean to remove (default: 4)
-%   hf_pass: double - high frequency pass band - frequency for high pass filter in Hz (default: 35 Hz)
-%   bb_crit: double - broadband criterion - number of stds/MAD above the mean to remove (default: 4)
-%   bb_pass: double - broadband pass band - frequency for high pass filter in Hz (default: 2 Hz)
-%   smooth_duration: double - time (in seconds) to smooth the time series (default: 2 seconds)
-%   detrend_duration: double - time (in seconds) to use for detrending (default: 300 seconds)
-%   buffer_duration: double - time (in seconds) to mask on both sides of detected artifacts (default: 0 second)
-%   verbose: logical - verbose output (default: false)
-%   histogram_plot: logical - plot histograms for debugging (default: false)
-%   return_filts_only: logical - return 3 digitalFilter objects and nothing else [1x3] (order is hpFilt_high, hpFilt_broad, detrend_filt)
-%                                for use in this function (default: false)
-%   hpFilt_high: digitalFilter - Includes parameters to use for the high frequency high pass filte
-%   hpFilt_broad: digitalFilter - Includes parameters to use for the broadband high pass filter
+%   Inputs:
+%       data : 1xN double - time series data -- required
+%       Fs   : double - sampling frequency in Hz -- required
 %
-%   Output:
-%   artifacts: 1xT logical of times flagged as artifacts (logical OR of hf and bb artifacts)
+%   Name-Value Pairs:
+%       'isexcluded'        : 1xN logical - time points excluded from threshold updating (default: all false)
+%       'crit_units'        : char - 'std' for iterative std or 'MAD' for a strict MAD threshold (default: 'std')
+%       'hf_crit'           : double - high-frequency criterion in stds/MADs above the mean (default: 4)
+%       'hf_pass'           : double - high-pass cutoff for the HF channel in Hz (default: 35)
+%       'bb_crit'           : double - broadband criterion in stds/MADs above the mean (default: 4)
+%       'bb_pass'           : double - high-pass cutoff for the broadband channel in Hz (default: 2)
+%       'smooth_duration'   : double - smoothing window in seconds (default: 2)
+%       'detrend_duration'  : double - detrending window in seconds (default: 300)
+%       'buffer_duration'   : double - mask buffer around detected artifacts in seconds (default: 0)
+%       'verbose'           : logical - verbose output (default: false)
+%       'histogram_plot'    : logical - plot histograms for debugging (default: false)
+%       'return_filts_only' : logical - return the three digitalFilter objects and exit (default: false)
+%       'hpFilt_high'       : digitalFilter - pre-built HF high-pass filter (default: [])
+%       'hpFilt_broad'      : digitalFilter - pre-built broadband high-pass filter (default: [])
 %
-%   Copyright 2024 Prerau Lab - http://www.sleepEEG.org
-%   This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
-%   (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+%   Outputs:
+%       artifacts : 1xT logical - times flagged as artifacts (logical OR of HF and broadband artifacts)
 %
-%% ********************************************************************
+%   Notes:
+%       When return_filts_only is true, the output is a 1x3 cell of
+%       digitalFilter objects in order {hpFilt_high, hpFilt_broad,
+%       detrend_filt}. Detrend is applied locally inside
+%       detrend_duration-length windows.
+%
+%   See also: multitaper_spectrogram_mex, designfilt, filtfilt
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %% Input parsing
 %Force column vector for uniformity

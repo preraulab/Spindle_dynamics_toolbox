@@ -1,41 +1,32 @@
 function [h_scaleline, h_scalelabel]=scaleline(varargin)
-%SCALELINE  Adds a scale line to the x or y axis of a figure. Line scales
-%with zoom.
+%SCALELINE  Add a zoom-aware scale bar to the x or y axis of a figure
 %
 %   Usage:
-%       [h_scaleline, h_scalelabel]=scaleline(ax,time)
-%       [h_scaleline, h_scalelabel]=scaleline(ax,time,label)
-%       [h_scaleline, h_scalelabel]=scaleline(ax,time,label,line_axis)
-%       [h_scaleline, h_scalelabel]=scaleline(ax,time,label,line_axis,gap)
+%       [h_scaleline, h_scalelabel] = scaleline(ax, time)
+%       [h_scaleline, h_scalelabel] = scaleline(ax, time, label)
+%       [h_scaleline, h_scalelabel] = scaleline(ax, time, label, line_axis)
+%       [h_scaleline, h_scalelabel] = scaleline(ax, time, label, line_axis, gap)
 %
-%   Input:
-%   ax: Axis to which to add the line (default: gca)
-%   time: Scale line length (in plot units)
-%   label: Label text for scale line (default: blank)
-%   line_axis: Axis to which the line is attached, 'x' or 'y' (default: 'x')
-%   gap: Gap between line and axis in normalized units (default: .01)
+%   Inputs:
+%       ax        : axes handle - target axes (default: gca)
+%       time      : double - scale line length in plot units
+%       label     : char - label text for the scale line (default: blank)
+%       line_axis : char - axis to which the line is attached, 'x' or 'y' (default: 'x')
+%       gap       : double - gap between line and axis in normalized units (default: 0.01)
 %
-%   Output:
-%   h_scaleline: Handle to the scale line
-%   h_scalelabel: Handle to the scale label
+%   Outputs:
+%       h_scaleline  : handle - handle to the scale line
+%       h_scalelabel : handle - handle to the scale label
 %
 %   Example:
+%       figure; plot(randn(1,10000)*10000); axis tight;
+%       xlabel('Time (s)'); ylabel('Voltage (V)');
+%       scaleline(gca, 1000, '1000 seconds');
+%       scaleline(gca, 5000, '5000 V', 'y');
 %
-%       figure
-%       plot(randn(1,10000)*10000)
-%       axis tight;
-%       xlabel('Time (seconds)');
-%       ylabel('Voltage (V)');
+%   See also: zoom, linkaxes
 %
-%       %Add x and y scale lines
-%       scaleline(gca,1000,'1000 seconds');
-%       scaleline(gca,5000,'5000 V','y');
-%
-%       zoom;
-%       msgbox('Zoom to change scale line limits');
-%
-%  Copyright 2024 Michael J. Prerau Laboratory. - http://www.sleepEEG.org
-%**************************************************************************
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 if ishandle(varargin{1}) && strcmp(get(varargin{1},'type'),'axes')
     ax=varargin{1};

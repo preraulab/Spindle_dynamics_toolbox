@@ -1,25 +1,28 @@
 function [phi0,sop0,sop_pp_mat] = plot_sop_prefphase(b,stats,ModelSpec)
-% PLOT_SOP_PREFPHASE plots preferred phase as a function of continuous SOP
-% Input:
-%       -b (double), fitted model parameters 
-%       -stats (struct), all results after model fitting 
-%       -ModelSpec (struct), model specifications
+%PLOT_SOP_PREFPHASE  Plot preferred SO phase as a function of continuous SO power
 %
-% Output:
-%       -A figure that shows how preferred phase changes with continuous SOP
-%       -phi0 (500x1, double), phase stamps for evaluation, 500 evenly spaced points from -pi to pi 
-%       -sop0 (510x1,double), SOP stamps for evaluation, 510 evenly spaced points from -5 to 30
-%       -sop_pp_mat (510x500 matrix,double), spindle rate heatmap as a function of (phi0,sop), 
-%                                            in unit of events per binsize
+%   Usage:
+%       [phi0, sop0, sop_pp_mat] = plot_sop_prefphase(b, stats, ModelSpec)
 %
+%   Inputs:
+%       b         : 1xM double - fitted model parameters from glmfit -- required
+%       stats     : struct - glmfit stats (covb, ...) -- required
+%       ModelSpec : struct - model specification, must contain SOpower:SOphase interaction -- required
 %
-% Please provide the following citation for all use:
-%       Shuqiang Chen,Mingjian He,Ritchie E. Brown, Uri T. Eden, Michael J Prerau, 
-%       "Individualized Temporal Patterns Drive Human Sleep Spindle Timing"
-%       PNAS, 2025, https://doi.org/10.1073/pnas.2405276121
+%   Outputs:
+%       phi0       : 500x1 double - phase samples, 500 evenly spaced points in [-pi, pi]
+%       sop0       : 510x1 double - SOP samples, 510 evenly spaced points
+%       sop_pp_mat : 510x500 double - spindle rate heatmap as a function of (SOP, phase)
 %
-% Created by SChen 010325
-%******************************************************************************************************************************************
+%   Notes:
+%       Requires SOpower:SOphase to be in ModelSpec.InteractSelect. The 95
+%       percent confidence band for the preferred phase is estimated by
+%       Monte Carlo sampling (M = 5000) from the coefficient covariance.
+%       Accompanies Chen et al., PNAS 2025.
+%
+%   See also: plot_stage_prefphase, specify_mdl, ismember_interaction
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %% Evaluate rate heatmap ~ phase,sop from the model
 % SOpower:SOphase Must be specified to generate this

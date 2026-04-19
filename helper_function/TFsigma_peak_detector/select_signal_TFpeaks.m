@@ -1,6 +1,27 @@
 function [ signal_idx, fig_compare ] = select_signal_TFpeaks(tpeak_properties, plot_on)
-% A new way of identifying TF peak signals using Kmeans clustering on
-% bandwith and duration dimensions and then joining booleans
+%SELECT_SIGNAL_TFPEAKS  Select TF-peak signals via k-means on duration and bandwidth dimensions
+%
+%   Usage:
+%       [signal_idx, fig_compare] = select_signal_TFpeaks(tpeak_properties, plot_on)
+%
+%   Inputs:
+%       tpeak_properties : struct - time-peak properties (proms, durations, central_frequencies, bandwidths) -- required
+%       plot_on          : logical - show diagnostic histograms (default: false)
+%
+%   Outputs:
+%       signal_idx  : Nx1 logical - true where the peak is labeled as signal
+%       fig_compare : handle - figure handle (empty when plot_on = false)
+%
+%   Notes:
+%       Runs k-means on each of 5 derived features (log-prominence, log-volume,
+%       duration, central frequency, bandwidth) with sensible class priors on
+%       duration ([0, 0.3, 1]) and bandwidth ([0.5, 2, 3.5]). The signal
+%       label is the conjunction of the right-most cluster on duration AND
+%       on bandwidth.
+%
+%   See also: TF_peak_detection, TF_peak_selection, kmeans
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 if nargin < 2
     plot_on = false;

@@ -1,14 +1,26 @@
 function ydB = nanpow2db(y)
-%POW2DB   Power to dB conversion, setting all bad values to nan
-%   YDB = POW2DB(Y) convert the data Y into its corresponding dB value YDB
+%NANPOW2DB  Power-to-dB conversion with non-positive inputs mapped to NaN
 %
-%   % Example:
-%   %   Calculate ratio of 2000W to 2W in decibels
+%   Usage:
+%       ydB = nanpow2db(y)
 %
-%   y1 = pow2db(2000/2)     % Answer in db
-
-%   Copyright 2006-2014 The MathWorks, Inc.
-% EDITED BY MJP 2/7/2020
+%   Inputs:
+%       y : double - power value(s), any shape -- required
+%
+%   Outputs:
+%       ydB : double - 10*log10(y), with NaN where y <= 0
+%
+%   Notes:
+%       Adds and subtracts 300 to force integer results when y is an exact
+%       power of 10. Adapted from The MathWorks pow2db with NaN-safe
+%       handling of non-positive samples (MJP, 2020-02-07).
+%
+%   Example:
+%       y1 = nanpow2db(2000/2);    % 30
+%
+%   See also: pow2db, db2pow, log10
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %ydB = 10*log10(y);
 %ydB = db(y,'power');

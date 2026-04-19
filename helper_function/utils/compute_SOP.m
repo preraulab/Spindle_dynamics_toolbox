@@ -1,75 +1,42 @@
 function [SOpower_norm, SOpower_times, SOpower_stages, norm_method, ptile] = compute_SOP(EEG, Fs, varargin)
-% COMPUTE_SOP computes slow-oscillation power
-% 
-% Usage:
-%   [SO_mat, freq_cbins, SO_cbins, time_in_bin, prop_in_bin, peak_SOpower_norm, peak_selection_inds] = ...
-%                                 SOpowerHistogram(EEG, Fs, TFpeak_times, TFpeak_freqs, <options>)
+%COMPUTE_SOP  Compute normalized slow-oscillation power from EEG
 %
-%  Inputs:
-%   REQUIRED:
-%       EEG: 1xN double - timeseries EEG data --required
-%       Fs: numerical - sampling frequency of EEG (Hz) --required
-%                   OR
-%       SOpower: 1xM double - timeseries SO power data --required
-%       SOpower_times: 1xM double - timeseries SO power times --required
+%   Usage:
+%       [SOpower_norm, SOpower_times, SOpower_stages, norm_method, ptile] = ...
+%           compute_SOP(EEG, Fs, 'Name', Value, ...)
 %
-%       TFpeak_freqs: Px1 - frequency each TF peak occurs (Hz) --required
-%       TFpeak_times: Px1 - times each TF peak occurs (s) --required
+%   Inputs:
+%       EEG : 1xN double - time series EEG data -- required
+%       Fs  : double - sampling frequency in Hz -- required
 %
-%   OPTIONAL:
-%       TFpeak_stages: Px1 - sleep stage each TF peak occurs 5=W,4=R,3=N1,2=N2,1=N3
-%       stage_vals:  1xS double - numeric stage values 5=W,4=R,3=N1,2=N2,1=N3
-%       stage_times: 1xS double - stage times
-%       freq_range: 1x2 double - min and max frequencies of TF peak to include in the histogram
-%                   (Hz). Default = [0,40]
-%       freq_binsizestep: 1x2 double - [size, step] frequency bin size and bin step for frequency
-%                         axis of SO power histograms (Hz). Default = [1, 0.2]
-%       SO_range: 1x2 double - min and max SO power values to consider in SO power analysis.
-%                 Default calculated using min and max of SO power
-%       SO_binsizestep: 1x2 double - [size, step] SO power bin size and step for SO power axis
-%                            of histogram. Units are radians. Default
-%                            size is (SO_range(2)-SOrange(1))/5, default step is
-%                            (SO_range(2)-SOrange(1))/100
-%       SO_freqrange: 1x2 double - min and max frequencies (Hz) considered to be "slow oscillation".
-%                     Default = [0.3, 1.5]
-%       SOPH_stages: stages in which to restrict the SOPH. Default: 1:3 (NREM only)
-%                    W = 5, REM = 4, N1 = 3, N2 = 2, N3 = 1, Artifact = 6, Undefined = 0
-%       norm_dim: double - histogram dimension to normalize, not related to norm_method (default: 0 = no normalization)
-%       compute_rate: logical - histogram output in terms of TFpeaks/min instead of count. 
-%                               Default = true.
-%       min_time_in_bin: numerical - time (minutes) required in each SO power bin to include
-%                                  in SOpower analysis. Otherwise all values in that SO power bin will
-%                                  be NaN. Default = 1.
-%       SOpower_outlier_threshold: double - cutoff threshold in standard deviation for excluding outlier SOpower values. 
-%                                  Default = 3. 
-%       norm_method: char - normalization method for SOpower. Options:'pNshiftS', 'percent', 'proportion', 'none'. Default: 'p2shift1234'
-%                         For shift, it follows the format pNshiftS where N is the percentile and S is the list of stages (5=W,4=R,3=N1,2=N2,1=N3).
-%                         (e.g. p2shift1234 = use the 2nd percentile of stages N3, N2, N1, and REM,
-%                               p5shift123 = use the 5th percentile of stages N3, N2 and N1)
-%       retain_Fs: logical - whether to upsample calculated SOpower to the sampling rate of EEG. Default = true
-%       EEG_times: 1xN double - times for each EEG sample. Default = (0:length(EEG)-1)/Fs
-%       time_range: 1x2 double - min and max times for which to include TFpeaks. Also used to normalize
-%                   SOpower. Default = [EEG_times(1), EEG_times(end)]
-%       isexcluded: 1xN logical - marks each timestep of EEG as artifact or non-artifact. Default = all false.
+%   Name-Value Pairs:
+%       'stage_vals'                : 1xS double - stage values (5=W,4=R,3=N1,2=N2,1=N3) (default: [])
+%       'stage_times'               : 1xS double - stage onset times (default: [])
+%       'SO_freqrange'              : 1x2 double - SO band in Hz (default: [0.3 1.5])
+%       'SOpower_outlier_threshold' : double - z-score cutoff for SOpower outliers (default: 3)
+%       'norm_method'               : char - 'pNshiftS', 'percent', 'proportion', or 'none' (default: 'p2shift1234')
+%       'retain_Fs'                 : logical - upsample SOpower to EEG Fs (default: true)
+%       'tapers'                    : 1x2 double - [TW, num_tapers] (default: [15 29])
+%       'window_params'             : 1x2 double - [win_size, step_size] in seconds (default: [30 15])
+%       'EEG_times'                 : 1xN double - EEG sample times (default: (0:N-1)/Fs)
+%       'time_range'                : 1x2 double - restrict normalization to this window (default: [EEG_times(1), end])
+%       'isexcluded'                : 1xN logical - artifact mask (default: all false)
 %
-%       plot_on: logical - SO power histogram plots. Default = false
-%       verbose: logical - Verbose output. Default = true
+%   Outputs:
+%       SOpower_norm   : 1xM double - normalized SOpower time series (row vector, possibly upsampled)
+%       SOpower_times  : 1xM double - times of the SOpower samples (s)
+%       SOpower_stages : 1xM double - stage value at each SOpower sample (or true if staging not provided)
+%       norm_method    : char - resolved normalization method name
+%       ptile          : double or 1x2 double - percentile value(s) used for normalization (empty for 'none'/'proportion')
 %
-%  Outputs:
-%       SO_mat: SO power histogram (SOpower x frequency)
-%       freq_cbins: 1xF double - centers of the frequency bins
-%       SO_cbins: 1xPO double - centers of the power SO bins
-%       time_in_bin: 1xTx5 double - minutes spent in each power bin for each stage
-%       prop_in_bin: 1xT double - proportion of total time (all stages) in each bin spent in
-%                          the selected stages
-%       peak_SOpower: 1xP double - normalized slow oscillation power at each TFpeak
-%       peak_selection_inds: 1xP logical - which TFpeaks are counted in the histogram
-%       SOpower: 1xM double - timeseries SO power data
-%       SOpower_times: 1xM double - timeseries SO power times
+%   Notes:
+%       pNshiftS parses to percentile N computed across the union of stages
+%       in S (digits). Artifact samples are replaced with NaN before the
+%       multitaper estimate via compute_mtspect_power.
 %
-% Copyright 2024 Michael J. Prerau Laboratory. - http://www.sleepEEG.org
-% Code adapted from Prerau Lab, SChen
-% **************************************************************
+%   See also: compute_mtspect_power, nanzscore, multitaper_spectrogram_mex
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %% Parse input
 %Input Error handling

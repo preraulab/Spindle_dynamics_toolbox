@@ -1,24 +1,26 @@
 function [stage_prop,timestamps] = compute_stage_prob(stagetrain,sop,sop_bin_divide)
-%COMPUTE_STAGE_PROB computes % time in stage
+%COMPUTE_STAGE_PROB  Compute per-bin stage proportions for a feature (e.g., SOpower)
 %
 %   Usage:
-%       stage_prop = compute_stage_prob(stage, sop, bin_divide)
+%       [stage_prop, timestamps] = compute_stage_prob(stagetrain, sop, sop_bin_divide)
 %
-%   Input:
-%   stage: 1xN double - interpolated hypnogram at the resolution of the feature -- required
-%   sop: 1xB double - feature bin centers -- required
-%   bin_divide: 1xB cell array - indices for times corresponding to each bin
+%   Inputs:
+%       stagetrain     : 1xN double - interpolated hypnogram at the resolution of sop -- required
+%       sop            : 1xN double - feature value per sample (e.g., SOpower) -- required
+%       sop_bin_divide : 1xB double - bin edges along the feature axis -- required
 %
-%   Output:
-%   stage_prob: Bx5 double - time in stage probabilites for each stage  % N3,N2,N1,REM,Wake
+%   Outputs:
+%       stage_prop : Bx5 double - per-bin stage proportions [N3, N2, N1, REM, Wake]
+%       timestamps : 1xB double - bin centers (useful for overlaying with the feature axis)
 %
-%   Copyright 2020 Michael J. Prerau, Ph.D. - http://www.sleepEEG.org
-%   This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
-%   (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+%   Notes:
+%       Each bin collects samples whose sop falls strictly between
+%       consecutive edges; the histogram over stage values 1..5 is
+%       normalized to 1 per bin.
 %
-%   Created, 10/27/2020 - MJP
-%   Last modified, 02/28/2023, SC
-%% ********************************************************************
+%   See also: compute_SOP, histcounts
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %Compute the stage probability and components
 bin_size = sop_bin_divide(2) - sop_bin_divide(1);

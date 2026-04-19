@@ -1,35 +1,36 @@
 function [xlag,yhat,yu,yl,hist_features] = plot_hist_curve(stats,ModelSpec,BinData)
-% PLOT_HIST_CURVE computes history modulation value, features, and plot history curve
-% Input:
-%       -stats (struct), results after model fitting 
-%       -ModelSpec (struct), model specifications
-%       -BinData (struct), binned data
+%PLOT_HIST_CURVE  Compute history modulation curves, derived features, and plot the history curve
 %
-% Output:
-%       -xlag (n x 1 vector), history time lag in sec
-%       -yhat (n x k vector), history modulation value
-%       -yu (n x k vector), history curve 95% confidence interval (upper)
-%       -yl (n x k vector), history curve 95% confidence interval (lower)
-%       Note: k = 1 when single history curve is computed
-%             k = 2 when N2 and N3 history curve are computed, 
-%               in which case, 1st col means N2 history, 2nd col means N3 history
-%             n is determined by history lag and sp_resol (n = history lag in bin / sp_resol)
-%       -hist_features (struct), it contains all history features, including
-%          --ref_period: refractory period (s)
-%          --exc_period: excited period(s)
-%          --p_time: peak time (s)
-%          --p_height: peak height
-%          --AUC_is: area under infraslow period (40-70) sec ,only when
-%                   'long' history is specified 
+%   Usage:
+%       [xlag, yhat, yu, yl, hist_features] = plot_hist_curve(stats, ModelSpec, BinData)
 %
+%   Inputs:
+%       stats     : struct - GLM results returned by glmfit -- required
+%       ModelSpec : struct - model specification (binsize, hist_ord, control_pt, ...) -- required
+%       BinData   : struct - binned data (sp, isis, ...) -- required
 %
-% Please provide the following citation for all use:
-%       Shuqiang Chen,Mingjian He,Ritchie E. Brown, Uri T. Eden, Michael J Prerau, 
-%       "Individualized Temporal Patterns Drive Human Sleep Spindle Timing"
-%       PNAS, 2025, https://doi.org/10.1073/pnas.2405276121
+%   Outputs:
+%       xlag          : nx1 double - history time lag in seconds
+%       yhat          : nxk double - history modulation (rate multiplier) values
+%       yu            : nxk double - upper 95 percent confidence bound
+%       yl            : nxk double - lower 95 percent confidence bound
+%       hist_features : struct - derived features of the history curve
 %
-% Last updated, SChen 010725
-%******************************************************************************************************************************************
+%   Notes:
+%       k = 1 for a single history curve; k = 2 when stage-dependent N2/N3
+%       curves are requested (col 1 = N2, col 2 = N3). n = hist_ord / sp_resol.
+%       hist_features fields:
+%           ref_period : refractory period (s)
+%           exc_period : excited period (s)
+%           p_time     : peak time (s)
+%           p_height   : peak height
+%           AUC_is     : area under the infraslow period (40-70 s), only when
+%                        'long' history is specified
+%       Accompanies Chen et al., PNAS 2025.
+%
+%   See also: compute_hist_features, FinerModCardinalSpline, glmval, shadebounds
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 if ModelSpec.BinarySelect(4) == 1
 %% Prepare for the figure

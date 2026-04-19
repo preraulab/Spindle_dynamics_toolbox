@@ -1,20 +1,30 @@
 function [BinData] = rawToBinData(res_table,Fs,binsize,hard_cutoffs,hist_choice)
-% RAWTOBINDATA converts raw data to binned data with other info
-% Input:
-%       - res_table,(table): Extracted spindle event info
-%       - Fs, (double): Sampling freq in Hz
-%       - binsize, (double): bin size in sec
-%       - hard_cutoffs (1x2 vector, double): Freq cutoff to post select fast spindles
-%                      choose events in freq range: [hard_cutoffs(1) hard_cutoffs(2)]
-%       - hist_choice, (string), either "short" or "long"
-%           --'long': Long term history (up to 90 secs, this can show infraslow activity)
-%           --'short': Short term history (up to 15 secs, this option runs fast)
+%RAWTOBINDATA  Convert extracted event/signal data into a binned struct ready for GLM fitting
 %
-% Output: BinData, a struct that contains all info for model fitting 
+%   Usage:
+%       BinData = rawToBinData(res_table, Fs, binsize, hard_cutoffs, hist_choice)
 %
-% Accompanying with Chen et al., PNAS, 2025
-% Updated 010624
-%******************************************************************************************************************************************
+%   Inputs:
+%       res_table    : table - extracted spindle event info and SO signals -- required
+%       Fs           : double - sampling frequency in Hz -- required
+%       binsize      : double - point-process bin size in seconds -- required
+%       hard_cutoffs : 1x2 double - frequency range (Hz) for fast spindle selection -- required
+%       hist_choice  : char - 'short' (15 s) or 'long' (90 s, infraslow) history window -- required
+%
+%   Outputs:
+%       BinData : struct - binned model inputs (y, sta, sop, phase, sp_hist, sp, RW,
+%                 real_time, spindletime_raw, isis, N2_rate, N3_rate, Fs)
+%
+%   Notes:
+%       The recording is trimmed to a 5-minute (300 s) buffer around the
+%       first and last NonWake epoch. History uses cardinal spline control
+%       points [0:15:90 120 hist_ord] (short) or
+%       [0:15:90 120 150:100:750 hist_ord] (long). Accompanies Chen et al.,
+%       PNAS 2025.
+%
+%   See also: preprocessToDesignMatrix, ModifiedCardinalSpline, Hist, RawPhase2BinPhase, stageraw2bin
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %% Extract fast spindle info
 fast_inds = (res_table.peak_freqs{:} >= hard_cutoffs(1)) & (res_table.peak_freqs{:}< hard_cutoffs(2));

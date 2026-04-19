@@ -1,11 +1,34 @@
 function [SO_power, stimes, sfreqs] = compute_mtspect_power(varargin)
-% COMPUTE_MTSPECT_POWER computes band power using multitaper spectrogram
+%COMPUTE_MTSPECT_POWER  Compute band power from the multitaper spectrogram of a time series
 %
+%   Usage:
+%       [SO_power, stimes, sfreqs] = compute_mtspect_power(data, Fs, 'Name', Value, ...)
 %
-%   Copyright 2022 Prerau Lab - http://www.sleepEEG.org
-%   This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
-%   (http://creativecommons.org/licenses/by-nc-sa/4.0/)
-% **************************************************************
+%   Inputs:
+%       data : 1xN double - time series -- required
+%       Fs   : double - sampling frequency in Hz -- required
+%
+%   Name-Value Pairs:
+%       'freq_range'       : 1x2 double - band to integrate in Hz (default: [0.3 1.5])
+%       'tapers'           : 1x2 double - [time-halfbandwidth product, number of tapers] (default: [15 29])
+%       'window_params'    : 1x2 double - [window size (s), step size (s)] (default: [30 15])
+%       'smoothing_method' : char - smoothdata method or 'none' (default: 'none')
+%       'smoothing_param'  : double - smoothing window in seconds (default: 300)
+%       'interp_times'     : 1xM double - times at which to interpolate the output (default: [])
+%       'verbose'          : logical - print diagnostics (default: false)
+%
+%   Outputs:
+%       SO_power : 1xT double - band-integrated power in dB (or interp_times when specified)
+%       stimes   : 1xT double - center times of the spectrogram bins (s)
+%       sfreqs   : 1xF double - spectrogram frequency bins (Hz)
+%
+%   Notes:
+%       Uses multitaper_spectrogram_mex internally; SO_power is converted to
+%       dB via nanpow2db with NaNs preserved across smoothing gaps.
+%
+%   See also: multitaper_spectrogram_mex, nanpow2db, smoothdata
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %% Parse input
 %Input Error handling

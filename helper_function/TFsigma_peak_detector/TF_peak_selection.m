@@ -1,126 +1,40 @@
 function [ TFpeak_times, noise_peak_times, clustering_idx, clustering_prom_order, lowbw_TFpeaks, clustering_centroids]...
     = TF_peak_selection(candidate_signals, candidate_times, varargin) 
+%TF_PEAK_SELECTION  Separate TF peaks from noise peaks among candidate prominence-curve peaks
 %
-% ** DETERMINING TF PEAK TIMES FROM CANDIDATE PEAKS**
-%&#x1F536;
+%   Usage:
+%       [TFpeak_times, noise_peak_times, clustering_idx, clustering_prom_order, lowbw_TFpeaks, clustering_centroids] = ...
+%           TF_peak_selection(candidate_signals, candidate_times, 'Name', Value, ...)
 %
-% function used to calculate which prominence curve peaks are TF peaks. 
-% This function uses kmeans to create two separate clusters and then
-% extracts TF peak times from one of the clusters that is labelled to be
-% TF peaks based on higher peak prominence (in time) values. An optional
-% rectification is provided by running a second round of kmeans that tries
-% to significantly reduce false positive rates, with the cost of
-% sacrificing some "true" TF peaks. 
+%   Inputs:
+%       candidate_signals : NxM double - feature matrix (rows = candidates, cols = features) -- required
+%       candidate_times   : Nx2 double - [start_time, end_time] for each candidate (s) -- required
 %
-% Usage: [ spindle_times ] = TF_peak_selection(candidate_signals, candidate_times, '<flag#1>',<arg#1>...'<flag#n>',<arg#n>);
-% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-% ##### Declared Inputs: [[[NEEDS UPDATES!!!]]]
-%           The following variables can be acquired from the function
-%           find_prominence_peaks.m:
+%   Name-Value Pairs:
+%       'detection_method'     : char - 'kmeans' or 'threshold' (default: 'kmeans')
+%       'kmeans_class'         : integer - number of k-means clusters (default: 2)
+%       'prominence_column'    : integer - column of candidate_signals holding log-prominence (default: 1)
+%       'threshold_percentile' : double - percentile threshold for 'threshold' method, 0-100 (default: 75)
+%       'lowbw_TFpeaks'        : Nx2 double - pre-flagged low-bandwidth peaks (default: [])
+%       'verbose'              : logical - print diagnostics (default: true)
 %
-%           - can_signals:      This is the input signal(s) of candidate
-%                               spindle peaks from which spindles are
-%                               detected. It can either be a vector of peak
-%                               prominence values with the same length as
-%                               number of candidate spindles, or a matrix
-%                               with dimensions [#row = number of candidate
-%                               spindles] and [#column = different features
-%                               about each candidate spindle]. 
+%   Outputs:
+%       TFpeak_times          : Nx2 double - [start, end] times of accepted TF peaks (s)
+%       noise_peak_times      : Nx2 double - [start, end] times of rejected noise peaks (s)
+%       clustering_idx        : Nx1 double - cluster assignment per candidate
+%       clustering_prom_order : 1xK integer - cluster ranking by mean prominence (highest first)
+%       lowbw_TFpeaks         : Nx2 double - low-bandwidth TFpeaks (pass-through)
+%       clustering_centroids  : KxM double - cluster centroids (k-means only)
 %
-%           - can_times:        A matrix with two columns, specifying the
-%                               start and end times of candidate spindle
-%                               times. Output detected spindle times are
-%                               subsets from this input can_times, so it 
-%                               should have the same length as the number
-%                               of candidate spindles. 
+%   Notes:
+%       The k-means path labels the cluster with the highest mean prominence
+%       as TF peaks. The threshold path cuts at the requested prominence
+%       percentile. TODO: support stage-restricted clustering.
 %
-% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-% ##### Optional Inputs:
+%   See also: TF_peak_detection, select_signal_TFpeaks, kmeans
 %
-%           - 'detection_method':   Method used to detect sleep spindles,
-%                                   can be either 'kmeans' or 'threshold'. 
-%                                   default: 'kmeans'
-%
-%           - 'prominence_column':  A column number specifying which column
-%                                   of can_signals is prominence value.
-%                                   This is used to disambiguate which
-%                                   group clustered by kmeans is spindles.
-%                                   This column should normally be in
-%                                   logarithmic scale already. If not, log
-%                                   it before constructing can_signals.
-%                                   default: 1
-%
-%           - 'bandwidth_column':   A column number for the bandwidth. Will
-%                                   perform an arbitrary cutoff below half
-%                                   of specified spectral resolution to be
-%                                   non-spindles.
-%                                   default: []
-%
-%           - 'spectral_resol':     A value specifying spectral resolution,
-%                                   will be used to mark non-spindles if
-%                                   bandwidth_column is non-empty.
-%                                   Everything with bandwidth below half of
-%                                   this value will be non-spindles.
-%                                   default: 4
-%
-%           - 'kmeans_column':      A parameter specifying the columns of
-%                                   can_signals to use in the kmeans
-%                                   algorithm. If this value is Inf and
-%                                   method is 'kmeans', then all columns
-%                                   are used. 
-%                                   default: Inf
-%
-%           - 'kmeans_class':       A parameter specifying the number of
-%                                   classes to detect in the kmeans
-%                                   algorithm.
-%                                   default: 2
-%
-%           - 'threshold_percentile':  A parameter specifying percentile
-%                                   threshold used for cut-off detection of
-%                                   spindles from candidate spindles (range
-%                                   0-1). 
-%                                   default: 0.75
-%
-%           - 'verbose':            Whether to print some verbose messages.
-%                                   default: true
-%
-% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-% ##### Outputs:
-%
-%           - spindle_times:        A two column vector containing
-%                                   [spindle_start, spindle_end] times in
-%                                   seconds.
-%
-%           - non_spindle_times:    A two column vector containing
-%                                   [nonspindle_start, nonspindle_end]
-%                                   times in seconds.
-%
-%           - spindle_index:        A logical index that is the same length
-%                                   as the number of candidate spindles
-%                                   (i.e., length of can_signals and
-%                                   can_times). 1 for detected spindles, 0
-%                                   for detected non-spindles. 
-%
-%           - group_idx:            A double array specifying the group
-%                                   assignment of all candidate spindles by
-%                                   kmeans, will be redundant with
-%                                   spindle_index if 'threshold' is the
-%                                   method. 
-%
-%           - spindle_group:        An integer specifying which integer in
-%                                   the group_idx array is spindle. Will be
-%                                   1 if 'threshold' is the method.
-%
-%           - group_order:          An array encoding the group order from
-%                                   higher peak prominence values to lower.
-%           
-%           - clustering_centroids: KxN matrix where N is number of dims and K is 
-%                                   number of clusters.
-%
-%   TODO: Implement flag to use only particular stages in clustering and
-%   apply those clusters to TFpeaks from all stages detected. Must include staging as input 
-%                               
-% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
+
 warn_state = warning; 
 
 %%

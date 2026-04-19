@@ -1,28 +1,36 @@
 function quick_start
-% QUICK_START starts a GUI to allow users to specify model and generate an overview figure
+%QUICK_START  Launch a GUI to specify a spindle-dynamics model and generate an overview figure
 %
-% STEPS:
-%         1) load data (example data or their own data)
-%         2) Choose model factors
-%         3) Choose history orders, if history is included in 2)
-%         4) Choose interaction terms
-% Click on the "Run the Model" button -> An overview figure will be generated
-% 
-% To load user data, make sure your .mat file has ALL variable names for
-% including EEG,Fs,stage_val,stage_time. 
-% -- See all accepted names for each variable (case-insensitive):
-% 1. EEG names can be 'EEG', 'eeg_data', 'raw_EEG','data'
-% 2. Fs names can be 'Fs', 'sampling_rate'
-% 3. stage_val names can be 'stage_val', 'stage_vals', 'stages','stage','stageval','stagevals'
-% 4. stage_time names can be 'stage_time', 'stage_t', 'time_stages','stage_t','stage_times'
-% 
-% Please provide the following citation for all use:
-%       Shuqiang Chen,Mingjian He,Ritchie E. Brown, Uri T. Eden, Michael J Prerau, 
-%       "Individualized Temporal Patterns Drive Human Sleep Spindle Timing"
-%       PNAS, 2025, https://doi.org/10.1073/pnas.2405276121
+%   Usage:
+%       quick_start
 %
-% Last updated, SChen 010725
-%******************************************************************************************************************************************
+%   Inputs:
+%       none
+%
+%   Outputs:
+%       none (side effects only - opens a uifigure and produces an overview figure)
+%
+%   Notes:
+%       GUI steps:
+%         1) load data (bundled example or user data)
+%         2) choose model factors (SOphase, stage, SOpower, history)
+%         3) choose history order if history is selected
+%         4) choose interaction terms
+%       Clicking "Run the Model" triggers the pipeline and renders the
+%       overview figure.
+%
+%       To load user data, the .mat file must contain EEG, Fs, stage_val,
+%       and stage_time (variable names are matched case-insensitively):
+%         EEG        : 'EEG', 'eeg_data', 'raw_EEG', 'data'
+%         Fs         : 'Fs', 'sampling_rate'
+%         stage_val  : 'stage_val', 'stage_vals', 'stages', 'stage', 'stageval', 'stagevals'
+%         stage_time : 'stage_time', 'stage_t', 'time_stages', 'stage_times'
+%
+%       Accompanies Chen et al., PNAS 2025.
+%
+%   See also: Example_Script, specify_mdl, preprocessToDesignMatrix
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %% GUI   
     % Add path

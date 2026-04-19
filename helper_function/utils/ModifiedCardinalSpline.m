@@ -1,16 +1,25 @@
 function [Sp] = ModifiedCardinalSpline(ord,c_pt_times_all,s)
-%MODIFIEDCARDINALSPLINE computes cardinal spline for non-uniform spacing
+%MODIFIEDCARDINALSPLINE  Compute a cardinal spline basis for non-uniform knots, avoiding boundary effects
 %
-% Input: 
-%       -ord, (double): history order 
-%       -c_pt_times_all, (double, vector): knot locations
-%       -s, (double): tension parameter
-% Ouput: Spline matrix
+%   Usage:
+%       Sp = ModifiedCardinalSpline(ord, c_pt_times_all, s)
 %
-% Modified cardinal spline avoids the boundary effect, updated based on the code from: 
-% Sarmashghi M, Jadhav SP, Eden U. Efficient spline regression for neural spiking data. PLoS One. 2021
-% SChen, 10/17/22
-%************************************************************************************
+%   Inputs:
+%       ord            : integer - history order (number of rows) -- required
+%       c_pt_times_all : 1xK double - knot locations (bin units) -- required
+%       s              : double - cardinal spline tension parameter -- required
+%
+%   Outputs:
+%       Sp : ordxK double - cardinal spline basis matrix evaluated at each bin
+%
+%   Notes:
+%       Boundary knots use the reflected-tangent correction from
+%       Sarmashghi, Jadhav, and Eden, PLoS One 2021. Interior knots apply
+%       tension scaling factors derived from non-uniform spacing.
+%
+%   See also: FinerModCardinalSpline, build_design_mt
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %%
 lastknot = ord;

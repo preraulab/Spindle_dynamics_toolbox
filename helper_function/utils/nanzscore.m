@@ -1,23 +1,28 @@
-% nanzscore - Computes z-scores for data with NaN values
+%NANZSCORE  Z-score a numeric array while ignoring NaN entries
 %
-% Syntax:
-%   [zscored, mu, sigma] = nanzscore(data, varargin)
+%   Usage:
+%       [zscored, mu, sigma] = nanzscore(data, varargin)
 %
-% Inputs:
-%   - data: Input data array with NaN values
-%   - varargin: Additional arguments passed to the zscore function
+%   Inputs:
+%       data     : numeric - input array, may contain NaN -- required
+%       varargin : additional arguments forwarded to zscore()
 %
-% Outputs:
-%   - zscored: Z-scored data array
-%   - mu: Mean of the non-NaN values in data
-%   - sigma: Standard deviation of the non-NaN values in data
+%   Outputs:
+%       zscored : numeric - z-scored values of the non-NaN entries of data
+%       mu      : double - mean of the non-NaN values
+%       sigma   : double - standard deviation of the non-NaN values
 %
-% Example:
-%   data = [1, 2, NaN, 4, 5];
-%   [zscored, mu, sigma] = nanzscore(data);
+%   Notes:
+%       The returned zscored array has the same length as the non-NaN
+%       subset of data, not the original input.
 %
-%   Copyright 2024 Michael J. Prerau Laboratory - http://www.sleepEEG.org
-%********************************************************************
+%   Example:
+%       data = [1, 2, NaN, 4, 5];
+%       [zscored, mu, sigma] = nanzscore(data);
+%
+%   See also: zscore, isnan
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 function [zscored, mu, sigma] = nanzscore(data, varargin)
     % Find non-NaN indices in the data

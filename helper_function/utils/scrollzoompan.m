@@ -1,38 +1,34 @@
 function [zslider, pslider, zedit, pedit, zlabel, plabel, zlstnr, plstnr]=scrollzoompan(ax, dir, zoom_fcn, pan_fcn, bounds)
-%SCROLLZOOMPAN  Adds pan and zoom scroll bars to an axis
-%               mouse wheel = pan, shift + mouse wheel = zoom
+%SCROLLZOOMPAN  Add pan and zoom scroll bars to an axis (mouse wheel = pan, shift+wheel = zoom)
 %
 %   Usage:
-%   [zslider, pslider, zedit, pedit, zlabel, plabel, zlstnr, plstnr] = scrollzoompan(ax, dir, zoom_fcn, pan_fcn)
+%       [zslider, pslider, zedit, pedit, zlabel, plabel, zlstnr, plstnr] = ...
+%           scrollzoompan(ax, dir, zoom_fcn, pan_fcn, bounds)
 %
-%   Input:
-%   ax: Axis to zoom and pan (default: gca)
-%   dir: Zoom/pan direction {'x','y'} (default: 'x')
-%   zslider/pslider: Handles to slider object handles (default: creates at figure bottom)
-%   zoom_fcn/pan_fcn: Handles to functions to be called on zoom or pan
+%   Inputs:
+%       ax       : axes handle - axis to zoom and pan (default: gca)
+%       dir      : char - 'x' or 'y' zoom/pan direction (default: 'x')
+%       zoom_fcn : function handle - called on zoom (default: [])
+%       pan_fcn  : function handle - called on pan (default: [])
+%       bounds   : 1x2 double - absolute min/max for the zoom/pan axis (default: axis limits)
 %
-%   Output:
-%   zslider: Zoom slider handle
-%   pslider: Pan slider handle
-%   zedit: Zoom edit handle
-%   pedit: Pan edit handle
-%   zlabel: Zoom text label handle
-%   plabel: Pan text label handle
-%   zlstnr: Zoom slider listener
-%   plstnr: Pan slider listener
+%   Outputs:
+%       zslider : slider handle - zoom slider
+%       pslider : slider handle - pan slider
+%       zedit   : edit handle - zoom edit box
+%       pedit   : edit handle - pan edit box
+%       zlabel  : text handle - zoom label
+%       plabel  : text handle - pan label
+%       zlstnr  : listener - zoom slider listener
+%       plstnr  : listener - pan slider listener
 %
 %   Example:
+%       figure; plot(randn(1,1000)); scrollzoompan;
+%       figure; imagesc(peaks(1000)); scrollzoompan(gca, 'y');
 %
-%     figure
-%     plot(randn(1,1000));
-%     scrollzoompan;
+%   See also: zoom, pan, linkaxes
 %
-%     figure
-%     imagesc(peaks(1000));
-%     scrollzoompan(gca,'y');
-%
-%  Copyright 2024 Michael J. Prerau Laboratory. - http://www.sleepEEG.org
-%**************************************************************************
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %Set default axes to current
 if nargin==0

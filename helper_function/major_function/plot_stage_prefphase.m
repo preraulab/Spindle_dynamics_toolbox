@@ -1,26 +1,26 @@
 function [pp,pp_CI] = plot_stage_prefphase(b,stats,ModelSpec)
-% PLOT_STAGE_PREFPHASE generates a figure showing preferred phase in N1,N2, and N3 stage
-% Input:
-%       -b (double), fitted model parameters 
-%       -stats (struct), all results after model fitting 
-%       -ModelSpec (struct), model specifications
+%PLOT_STAGE_PREFPHASE  Plot preferred SO phase in N1, N2, and N3 sleep stages
 %
-% Output:
-%       -A figure that shows how preferred phase changes with sleep stage
-%       -pp (3x1,double), preferred phase (rad) for N1, N2, and N3 stage
-%       -pp_CI (3x2,double), 95% CI for preferred phase in N1, N2, and N3 stage
-%                           1st column (lower bound for each stage)
-%                           2nd column (upper bound for each stage)
+%   Usage:
+%       [pp, pp_CI] = plot_stage_prefphase(b, stats, ModelSpec)
 %
+%   Inputs:
+%       b         : 1xM double - fitted model parameters from glmfit -- required
+%       stats     : struct - glmfit stats (covb, ...) -- required
+%       ModelSpec : struct - model specification, must contain stage:SOphase interaction -- required
 %
-% Please provide the following citation for all use:
-%       Shuqiang Chen,Mingjian He,Ritchie E. Brown, Uri T. Eden, Michael J Prerau, 
-%       "Individualized Temporal Patterns Drive Human Sleep Spindle Timing"
-%       PNAS, 2025, https://doi.org/10.1073/pnas.2405276121
+%   Outputs:
+%       pp    : 3x1 double - preferred phase (rad) for N1, N2, N3
+%       pp_CI : 3x2 double - 95 percent CI for each preferred phase (col 1: lower, col 2: upper)
 %
-% Created by SChen 123124
-% Last updated, SChen 010725
-%******************************************************************************************************************************************
+%   Notes:
+%       Requires stage:SOphase to be in ModelSpec.InteractSelect. The CI is
+%       estimated by Monte Carlo sampling (M = 10000) from the coefficient
+%       covariance. Accompanies Chen et al., PNAS 2025.
+%
+%   See also: plot_sop_prefphase, specify_mdl, ismember_interaction
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %% stage:SOphase must be specified to generate this
 if any(ismember_interaction(ModelSpec.InteractSelect,{'stage:SOphase'}))

@@ -1,90 +1,47 @@
-%FIGDESIGN  Simple, interactive design tool for figure and axes. Can format grids of axes,
-%           as well as merge existing axes.
+%FIGDESIGN  Simple, interactive design tool for figures and axes (create grids, merge axes)
 %
 %   Usage:
-%       axis_handles=figdesign(num_rows, num_cols, options)
-%       axis_handles=figdesign(fig_handle, num_rows, num_cols, options)
-%       axis_handles=figdesign() %Run with no parameters for design mode
-%       axis_handles=figdesign('demo') %Run demo
+%       axis_handles = figdesign(num_rows, num_cols, 'Name', Value, ...)
+%       axis_handles = figdesign(fig_handle, num_rows, num_cols, 'Name', Value, ...)
+%       axis_handles = figdesign()        % no args = interactive design mode
+%       axis_handles = figdesign('demo')  % built-in demo
 %
-%   Input:
-%   num_rows: the number of rows in the subplot
-%   num_cols: the number of columns in the subplot
-%   fig_handle: handle to parent figure
+%   Inputs:
+%       num_rows   : integer - number of rows in the subplot grid
+%       num_cols   : integer - number of columns in the subplot grid
+%       fig_handle : handle - parent figure (optional)
 %
-%   Options:
-%   iteract: a boolean, which enables/disables grid interaction window (default: false).
-%            Closing the interaction window actives interactive merging.
-%            menu option on main figure.
+%   Name-Value Pairs:
+%       'interact'   : logical - enable the grid interaction window (default: false)
+%       'margins'    : 1x6 double - normalized [top bottom left right column row] (default: [.1 .05 .08 .05 .08 .08])
+%       'merge'      : array or cell - indices of axes to merge (default: [])
+%       'numberaxes' : logical - title each axis with its index (default: false)
+%       <figure options> : any name-value accepted by figure(); Units are forced to 'normalized'
 %
-%            To get new figure handles after interactive mergine, use:
-%               axes_handles=figdesign('handles');
-%   margins: a vector of margin size defined in normalized units as [top bottom left right column row]
-%            (default: [.1 .05 .08 .05 .08 .08])
-%   merge: an array or cell array, with indices of axes to merge
-%   numberaxes: logical, titles each axis with the axis number (default: false)
-%   <figure options>: list of name-value pairs of valid options for figure
-%   class. Units are forced to be normalized
+%   Outputs:
+%       axis_handles : 1x(num_rows*num_cols) axes handle vector
 %
-%   Output:
-%   axis_handles: 1x(num_rows*numcols) vector of axis handles
+%   Example:
+%       %Simple instantiation
+%       figure; ax = figdesign(2,2);
+%       for i = 1:length(ax), plot(ax(i), randn(1,1000)); end
+%       linkaxes(ax,'x');
 %
-%   TO RUN DESIGN MODE:
-%       ax = figdesign();
+%       %Custom margins
+%       figdesign(2,2,'margins',[.05 .05 .08 .05 .2 .3]);
 %
-%   TO RUN DEMO:
-%       figdesign('demo');
+%       %Specific page size/orientation
+%       figure; figdesign(2,3,'type','usletter','orient','landscape');
 %
-%   Examples:
-%         EXAMPLE 1:
-%             %Simple instantiation
-%             figure
-%             ax=figdesign(2,2);
-%             for i=1:length(ax)
-%                 plot(ax(i), randn(1,1000));
-%             end
-%             linkaxes(ax,'x');
+%       %Merge axes
+%       figure; figdesign(4,4,'merge',{1:3,[5 6 9 10],[4 8 12 16],[7 11],[14 15]});
 %
-%         EXAMPLE 2:
-%             %Define custom margins
-%             top=.05;
-%             bottom=.05;
-%             left=.08;
-%             right=.05;
-%             column=.2;
-%             row=.3;
+%       %Interactive merge and adjustment
+%       figure; figdesign(3,3,'interact',1);
 %
-%             %Create subplot
-%             figdesign(2,2,'margins',[top bottom left right column row]);
+%   See also: subplot, figure, axes
 %
-%         EXAMPLE 3:
-%             %Define specific page size and orient
-%             figure
-%             figdesign(2,3,'type','usletter','orient','landscape');
-%
-%         EXAMPLE 4:
-%             %Merge axes
-%             figure
-%             figdesign(4,4,'type','usletter','orient','portrait','merge',{1:3,[5 6 9 10],[4 8 12 16], [7 11],[14 15]});
-%
-%         EXAMPLE 5:
-%             %Interactive merge figures
-%             figure
-%             figdesign(3,3,'type','usletter','orient','portrait');
-%             msgbox('Under the figure menu, select FigDesign>Merge. Single click on axes to merge. Double click on the last axis to complete merger.');
-%
-%         EXAMPLE 6:
-%             %Interactive adjust page margins
-%             figure
-%             figdesign(3,3,'type','usletter','orient','portrait','units','inches','margins',[.5 .5 1 1 .5],'interact',1);
-%             msgbox('Move sliders to adjust axes parameters. Type in the edit boxes to enter specific numerical values. When the adjustment window is closed, interactive figure merging is enabled on the main figure.');
-%
-%             %Call with handles operator to get new axes handles
-%             axs=figdesign('handles');
-%             linkaxes(axs,'x');
-%
-%   Copyright 2024 Michael J. Prerau Laboratory. - http://www.sleepEEG.org
-%**************************************************************************
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 function axis_handles=figdesign(varargin)
 %Run demo

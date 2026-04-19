@@ -1,9 +1,22 @@
 function [] = plotcos()
-%PLOTCOS plot a cosine reference plot
-% Where cos(0) = 1, means slow oscillation (SO) upstate
-% cos(pi or -pi) = -1, indicates SO downstate
-% Last updated, SChen 010725
-%******************************************************************************************************************************************
+%PLOTCOS  Draw a cosine reference plot annotated with SO up/down states
+%
+%   Usage:
+%       plotcos()
+%
+%   Inputs:
+%       none
+%
+%   Outputs:
+%       none (side effects only - draws into the current axes)
+%
+%   Notes:
+%       cos(0) = 1 marks the slow oscillation (SO) upstate; cos(+/-pi) = -1
+%       marks the SO downstate. Convenience overlay for SO-phase figures.
+%
+%   See also: plot_stage_prefphase, phasehistogram
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
     xs = -pi:0.01:pi;
     ys = cos(xs);

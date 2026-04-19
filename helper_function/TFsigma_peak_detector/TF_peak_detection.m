@@ -1,57 +1,49 @@
 function [ spindle_table, mt_spect, fpeak_proms, fpeak_properties, tpeak_properties, noise_peak_times, lowbw_TFpeaks, fh ] = TF_peak_detection(EEG, Fs, sleep_stages, varargin)
-% TF_PEAK_DETECTION  Detect time-frequency peaks in EEG data
+%TF_PEAK_DETECTION  Detect time-frequency peaks (spindle candidates) in EEG data
 %
 %   Usage:
-%       [spindle_table, mt_spect, fpeak_proms, fpeak_properties, tpeak_properties, noise_peak_times, lowbw_TFpeaks, fh] = TF_peak_detection(EEG, Fs, sleep_stages, 'Name1', Value1, 'Name2', Value2, ...)
+%       [spindle_table, mt_spect, fpeak_proms, fpeak_properties, tpeak_properties, noise_peak_times, lowbw_TFpeaks, fh] = ...
+%           TF_peak_detection(EEG, Fs, sleep_stages, 'Name', Value, ...)
 %
-%   Input:
-%       EEG: <number of samples> x 1 vector - EEG data
-%       Fs: double - sampling frequency in Hz
-%       sleep_stages: <number of samples> x 2 matrix - sleep stage transitions
-%       'detection_stages': 1xN vector - stages for peak detection (default: [1 2 3])
-%       'to_plot': boolean - plot results (default: false)
-%       'verbose': boolean - display verbose output (default: true)
-%       'spindle_freq_range': 1x2 vector - spindle frequency range (default: [0, Fs/2])
-%       'extract_property': boolean - extract properties only (default: false)
-%       'signal_selection_routine': string - signal selection routine ('post2021' or 'sleep2021', default: 'post2021')
-%       'artifact_detect': boolean / boolean vector - flag to detect artifacts or a boolean vector indicating artifact time points (default: true)
-%       'artifact_filters': struct - artifact filter parameters (default: empty struct)
-%       'use_volume': boolean - use volume for signal selection (default: false)
-%       'peak_freq_range': 1x2 vector - frequency range for peak detection (default: [9 17])
-%       'findpeaks_freq_range': 1x2 vector - larger frequency range for finding peaks to identify peaks outside the peak_freq_range (default: determined from 'peak_freq_range')
-%       'in_db': boolean - peak detection in decibels (default: false)
-%       'smooth_Hz': double - smoothing in frequency domain (default: 0)
+%   Inputs:
+%       EEG          : Nx1 double - EEG data -- required
+%       Fs           : double - sampling frequency in Hz -- required
+%       sleep_stages : Nx2 double - sleep stage transitions (time, stage) -- required
 %
-%   Output:
-%       spindle_table: table - detected spindle peaks information
-%       mt_spect: struct - multitaper spectrogram information
-%       fpeak_proms: vector - prominence values of frequency peaks
-%       fpeak_properties: struct - properties of frequency peaks
-%       tpeak_properties: struct - properties of time peaks
-%       noise_peak_times: vector - times of detected noise peaks
-%       lowbw_TFpeaks: vector - low bandwidth time-frequency peaks
-%       fh: figure handle - handle to the generated figure
+%   Name-Value Pairs:
+%       'detection_stages'         : 1xN double - stages used for peak detection (default: [1 2 3])
+%       'to_plot'                  : logical - plot results (default: false)
+%       'verbose'                  : logical - display verbose output (default: true)
+%       'spindle_freq_range'       : 1x2 double - spindle frequency range in Hz (default: [0, Fs/2])
+%       'extract_property'         : logical - extract TF properties only, skip signal selection (default: false)
+%       'signal_selection_routine' : char - 'post2021' or 'sleep2021' (default: 'post2021')
+%       'artifact_detect'          : logical/logical vector - auto-detect artifacts, or a boolean mask (default: true)
+%       'artifact_filters'         : struct - artifact filter parameters (default: empty struct)
+%       'use_volume'               : logical - use volume for signal selection (default: false)
+%       'peak_freq_range'          : 1x2 double - frequency range for peak detection (default: [9 17])
+%       'findpeaks_freq_range'     : 1x2 double - wider frequency range for findpeaks (default: derived from peak_freq_range)
+%       'in_db'                    : logical - peak detection on dB spectrum (default: false)
+%       'smooth_Hz'                : double - frequency-domain smoothing width in Hz (default: 0)
 %
-%   Details:
-%   This function detects time-frequency peaks in EEG data using a combination of techniques
-%   including multitaper spectrogram computation, artifact detection, frequency peak detection,
-%   time peak detection, and signal selection routines.
+%   Outputs:
+%       spindle_table    : table - detected spindle peaks information
+%       mt_spect         : struct - multitaper spectrogram (spect, stimes, sfreqs, stages_in_stimes)
+%       fpeak_proms      : 1xT double - per-timepoint frequency-peak prominence
+%       fpeak_properties : struct - frequency peak properties (freqs, bandwidths, bandwidth_bounds)
+%       tpeak_properties : struct - time peak properties (proms, times, durations, center_times, ...)
+%       noise_peak_times : Nx2 double - [start, end] times of peaks labeled as noise
+%       lowbw_TFpeaks    : Nx2 double - low-bandwidth TF peaks flagged separately
+%       fh               : handle - figure handle (empty when to_plot = false)
 %
-%   Example:
-%   % Define input variables
-%   EEG = ...; % EEG data vector
-%   Fs = ...; % Sampling frequency
-%   sleep_stages = ...; % Sleep stage transitions
+%   Notes:
+%       Detection pipeline: multitaper spectrogram -> artifact detection ->
+%       find_frequency_peaks -> find_time_peaks -> signal selection (post2021
+%       or sleep2021 routine). Uses the post-SLEEP-2021 signal/noise
+%       separation routine by default.
 %
-%   % Call the TF_peak_detection function with optional parameters
-%   [spindle_table, mt_spect, fpeak_proms, fpeak_properties, tpeak_properties, noise_peak_times, lowbw_TFpeaks, fh] = TF_peak_detection(EEG, Fs, sleep_stages, ...
-%       'detection_stages', [1 2 3], 'to_plot', true, 'verbose', true, 'spindle_freq_range', [10 16], ...);
+%   See also: find_frequency_peaks, find_time_peaks, TF_peak_selection, select_signal_TFpeaks
 %
-%  Latest version of TF_peak_detection using signal/noise separation routines developed after SLEEP 2021 publication ***
-%  Last edit: Alex He 09/29/2023
-%
-% Copyright 2024 Michael J. Prerau Laboratory. - http://www.sleepEEG.org
-%**************************************************************************
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 TF_peak_tic = tic;
 

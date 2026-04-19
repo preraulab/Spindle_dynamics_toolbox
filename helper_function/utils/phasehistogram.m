@@ -1,29 +1,29 @@
-%PHASEHISTOGRAM  Draw a polar histogram with mean arrow for phase data
+%PHASEHISTOGRAM  Draw a polar histogram with mean-vector arrow for phase data
 %
 %   Usage:
-%   [theta_mean, rho_mean, h_phist, h_pax, h_ml] = phasehistogram(phases, amps, <phasehistogram inputs>)
-% 
-%   Input:
-%   phases: 1xN vector of phase values
-%   amps: 1xN vector of amplitudes (default: 1)
-% 
-%   Output:
-%   theta_mean: mean angle
-%   rho_mean: mean magnitude
-%   h_phist: handle for phase histogram
-%   h_pax: handle for polar axis
-%   h_ml: handle for mean line
-% 
+%       [theta_mean, rho_mean, h_phist, h_pax, h_ml] = phasehistogram(phases, amps, 'Name', Value, ...)
+%
+%   Inputs:
+%       phases : 1xN double - phase values (rad) -- required
+%       amps   : 1xN double - amplitudes used to weight the mean vector (default: ones)
+%
+%   Name-Value Pairs:
+%       <polarhistogram options> : any name-value accepted by polarhistogram() (NumBins, FaceColor, FaceAlpha, ...)
+%
+%   Outputs:
+%       theta_mean : double - mean angle (rad)
+%       rho_mean   : double - mean magnitude (in histogram units after normalization to 'pdf')
+%       h_phist    : handle - polarhistogram handle
+%       h_pax      : handle - polar axes handle
+%       h_ml       : handle - mean-line handle
+%
 %   Example:
-%         % Generate some phases
-%         phases = mod(randn(1,1000) + pi/2, 2*pi);
+%       phases = mod(randn(1,1000) + pi/2, 2*pi);
+%       figure; phasehistogram(phases, 1, 'NumBins', 25, 'FaceColor', 'blue', 'FaceAlpha', 0.3);
 %
-%         %Create the plot
-%         figure;
-%         phasehistogram(phases, 1,'NumBins',25,'FaceColor','blue','FaceAlpha',.3);
+%   See also: polarhistogram, polaraxes
 %
-% Copyright 2024 Michael J. Prerau Laboratory. - http://www.sleepEEG.org
-%**************************************************************************
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 function [theta_mean, rho_mean, h_phist, h_pax, h_ml] = phasehistogram(phases, amps, varargin)
 if nargin==0

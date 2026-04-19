@@ -1,6 +1,35 @@
 function [ max_curve, bin_centers, hist_olN2, hist_olN3 ] = extract_density_curve(sel_freqs, sel_stages, bin_width, bin_step, bin_range, N2_minutes, N3_minutes, ignore_N3_threshold, plot_on)
-% Using the heuristic of max(stage2, stage3) to extract the cumulated
-% histogram curves for mid-point frequency of TFpeaks
+%EXTRACT_DENSITY_CURVE  Extract per-minute frequency density curves for N2/N3 TFpeaks and their max
+%
+%   Usage:
+%       [max_curve, bin_centers, hist_olN2, hist_olN3] = extract_density_curve( ...
+%           sel_freqs, sel_stages, bin_width, bin_step, bin_range, ...
+%           N2_minutes, N3_minutes, ignore_N3_threshold, plot_on)
+%
+%   Inputs:
+%       sel_freqs           : 1xN double - central frequencies (Hz) of selected TFpeaks -- required
+%       sel_stages          : 1xN categorical - sleep stage of each TFpeak -- required
+%       bin_width           : double - frequency bin width in Hz -- required
+%       bin_step            : double - frequency bin step in Hz -- required
+%       bin_range           : 1x2 double - [min, max] frequency range for binning -- required
+%       N2_minutes          : double - total N2 duration in minutes (for density normalization) -- required
+%       N3_minutes          : double - total N3 duration in minutes (for density normalization) -- required
+%       ignore_N3_threshold : double - ignore N3 curve if N3_minutes < this threshold -- required
+%       plot_on             : double - 0 = no plot, 1 = new figure, otherwise handle to target axes -- required
+%
+%   Outputs:
+%       max_curve   : 1xB double - per-bin max of the N2 and N3 density curves (events/min)
+%       bin_centers : 1xB double - centers of frequency bins (Hz)
+%       hist_olN2   : 1xB double - N2 binned density curve (events/min)
+%       hist_olN3   : 1xB double - N3 binned density curve (events/min)
+%
+%   Notes:
+%       Heuristic of max(stage2, stage3) is used to build a combined
+%       density curve for mid-point frequencies of TFpeaks.
+%
+%   See also: extract_maxfreq_peaks, extract_freq_clusters
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 % set up bin starts and ends
 hb = bin_width/2;

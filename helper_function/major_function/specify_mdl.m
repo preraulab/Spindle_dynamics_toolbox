@@ -1,40 +1,34 @@
 function [ModelSpec] = specify_mdl(BinarySelect,InteractSelect,varargin)
-% SPECIFY_MDL wraps model specifications provided by user into a ModelSpec struct.
-% 
-% Input:
-%       <Required inputs>
-%       - BinarySelect: (1x4 vector, double), indicates which factors are selected by the user
-%         Factors are with fixed order: SOphase, stage, SOpower,history
-%         e.g., [1,1,0,1] means select SOphase, stage, and history as model components 
-%       - InteractSelect: (1xn cell), each entry contains an interaction term in the form of A:B 
-%         It is case,order-insensitive, and accept multipler separators including:':', '&', and '-'
-%         n is the number of interactions. For example, we can add 2 interactions
-%         e.g., {'stage:SOphase', 'stage:history'} 
+%SPECIFY_MDL  Wrap user-provided model specifications into a ModelSpec struct
 %
-%       <Optional inputs>
-%       - hist_choice: (string), it is either 'short'(default) or 'long'
-%                   'short': Short term history (up to 15 secs, this option runs fast)
-%                   'long': Long term history (up to 90 secs, use this to show infraslow structure)
-%       - control_pt: (1xk vector,double), spline control point location, k is the number of control points
-%                    default: [0:15:90 120 150]
-%       - binsize: (double), point process bin size in sec, default: 0.1 sec
-%       - hard_cutoffs:(1x2 vector,double), frequency cutoff in Hz
-%                      default:[12 16], choose events in 12 to 16 Hz as fast spindles
-%       
-% Output:
-%       ModelSpec: A struct that contains all model specifications
+%   Usage:
+%       ModelSpec = specify_mdl(BinarySelect, InteractSelect, 'Name', Value, ...)
 %
-% Example 1: BinarySelect = [1,1,0,1];                     
-%            InteractSelect = {'stage:SOphase'};          
-%            [ModelSpec] = specify_mdl_factor(BinarySelect,InteractSelect);
+%   Inputs:
+%       BinarySelect   : 1x4 double - factor selector in fixed order [SOphase, stage, SOpower, history] -- required
+%       InteractSelect : 1xn cell - interaction terms 'A:B' (case- and order-insensitive; : & - accepted) -- required
 %
-% Please provide the following citation for all use:
-%       Shuqiang Chen,Mingjian He,Ritchie E. Brown, Uri T. Eden, Michael J Prerau, 
-%       "Individualized Temporal Patterns Drive Human Sleep Spindle Timing"
-%       PNAS, 2025, https://doi.org/10.1073/pnas.2405276121
+%   Name-Value Pairs:
+%       'hist_choice'  : char - 'short' (15 s history, fast) or 'long' (90 s history, infraslow structure) (default: 'short')
+%       'control_pt'   : 1xk double - spline control point locations (default: [0:15:90 120 150])
+%       'binsize'      : double - point-process bin size in seconds (default: 0.1)
+%       'hard_cutoffs' : 1x2 double - spindle frequency cutoffs in Hz (default: [12 16])
 %
-% Updated SChen 010725
-%***********************************************************************************
+%   Outputs:
+%       ModelSpec : struct - full model specification used throughout the toolbox
+%
+%   Example:
+%       BinarySelect = [1, 1, 0, 1];
+%       InteractSelect = {'stage:SOphase'};
+%       ModelSpec = specify_mdl(BinarySelect, InteractSelect);
+%
+%   Notes:
+%       Accompanies Chen et al., PNAS 2025. Valid interactions are
+%       stage:SOphase, SOphase:SOpower, and stage:history.
+%
+%   See also: preprocessToDesignMatrix, build_design_mt, ismember_interaction
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %% Parse inputs
 p = inputParser;

@@ -1,22 +1,29 @@
 function tf = ismember_interaction(targetInteraction, interactionsList)
-%ISMEMBER_INTERACTION finds which target interaction is in the list
+%ISMEMBER_INTERACTION  Check whether interaction strings are members of a list, case- and order-insensitive
 %
-% This function is generalized to:
-% * Be case-insensitive: Comparisons ignore capitalization.
-% * Be order-insensitive: The order of components (e.g., 'A:B' and 'B:A') does not matter.
-% * Handle multiple separators: Recognizes and treats ':', '&', and '-' as equivalent split symbols.
+%   Usage:
+%       tf = ismember_interaction(targetInteraction, interactionsList)
 %
-% Example:
-%         interactions = {'stage:SOphase', 'stage:history'};
-%         target_interaction = {'soPHASE&stage','stage:SOpower'};
-%         tf = ismember_interaction(target_interaction, interactions);
-% This will output tf as [1 0], a 1x2 logical array
-%                        where logical 1 means target(1) is in the list
-%                              logical 0 means target(2) is not in the list
+%   Inputs:
+%       targetInteraction : char or cell of char - target interaction(s) of the form 'A:B' -- required
+%       interactionsList  : cell of char - list of interactions to search within -- required
 %
-% Accompanying with Chen et al., PNAS, 2025
-% Updated SChen 123024
-% ********************************************************************
+%   Outputs:
+%       tf : 1xM logical - true where targetInteraction{m} matches any entry in interactionsList
+%
+%   Notes:
+%       Comparisons are case-insensitive, order-insensitive (so 'A:B' and
+%       'B:A' are equivalent), and treat ':', '&', and '-' as equivalent
+%       separators.
+%
+%   Example:
+%       interactions = {'stage:SOphase', 'stage:history'};
+%       target = {'soPHASE&stage','stage:SOpower'};
+%       tf = ismember_interaction(target, interactions);   % [1 0]
+%
+%   See also: ismember, specify_mdl, build_design_mt
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %%
     % Function to normalize the string

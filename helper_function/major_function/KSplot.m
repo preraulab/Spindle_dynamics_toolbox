@@ -1,18 +1,26 @@
 function [ks,ksT] = KSplot(CIF,y,ploton)
-% KSPLOT runs Kolmogorov–Smirnov (KS) test and plot KS plot
+%KSPLOT  Run a Kolmogorov-Smirnov test on the time-rescaled CIF and optionally plot the KS plot
 %
-% Input:
-%       - CIF (double), conditional intensity function
-%       - y (double), binary event train
-%       - ploton (double), generate KS plot if ploton is 1 
-% Output:
-%       - A KS plot
-%       - ks: KS statistic
-%       - ksT: KS test result, 0 means pass the KS test
-%                              1 means fail to pass the KS test
+%   Usage:
+%       [ks, ksT] = KSplot(CIF, y, ploton)
 %
-% Updated SC,123024
-%***********************************************************************************
+%   Inputs:
+%       CIF    : 1xN double - conditional intensity function -- required
+%       y      : 1xN double - binary event train -- required
+%       ploton : logical/double - if 1, draw the KS plot in the current axes -- required
+%
+%   Outputs:
+%       ks  : double - KS statistic (max |model CDF - empirical CDF|)
+%       ksT : double - KS test result (0 = pass, 1 = reject the null)
+%
+%   Notes:
+%       Applies the time-rescaling theorem to a point process described by
+%       CIF and evaluates the rescaled ISIs against an exponential
+%       reference, with 95% Kolmogorov bands at 1.36/sqrt(N).
+%
+%   See also: kstest, ecdf
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %%
 

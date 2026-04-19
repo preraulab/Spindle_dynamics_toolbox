@@ -1,22 +1,26 @@
 function [X] = build_design_mt(ModelSpec,BinData)
-% BUILD_DESIGN_MT constructs a design matrix based on the factors selected by the user.
-% Factors with fixed order: SOphase, stage, SOpower,history
-% 
-% Input:
-%       - ModelSpec, (struct): Model specifications
-%       - BinData, (struct): All binned data 
+%BUILD_DESIGN_MT  Construct a GLM design matrix from user-selected factors and interactions
 %
-% Output:
-%       - X (double,matrix): Design matrix 
+%   Usage:
+%       X = build_design_mt(ModelSpec, BinData)
 %
+%   Inputs:
+%       ModelSpec : struct - model specification (BinarySelect, InteractSelect, ...) -- required
+%       BinData   : struct - all binned data (sta, sop, phase, sp_hist, RW) -- required
 %
-% Please provide the following citation for all use:
-%       Shuqiang Chen,Mingjian He,Ritchie E. Brown, Uri T. Eden, Michael J Prerau, 
-%       "Individualized Temporal Patterns Drive Human Sleep Spindle Timing"
-%       PNAS, 2025, https://doi.org/10.1073/pnas.2405276121
+%   Outputs:
+%       X : TxP double - design matrix (size depends on selected factors and interactions)
 %
-% Last updated, SChen 010725
-%**********************************************************************************
+%   Notes:
+%       Factors have fixed order [SOphase, stage, SOpower, history]. SOP is
+%       rescaled internally by /5 and quadratic terms by /10 to improve
+%       numerical conditioning. Supported interactions: stage:SOphase,
+%       SOpower:SOphase, and combined stage:SOphase + stage:history.
+%       Accompanies Chen et al., PNAS 2025.
+%
+%   See also: specify_mdl, preprocessToDesignMatrix, ismember_interaction
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %% Deal with inputs
 

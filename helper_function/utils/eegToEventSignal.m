@@ -1,27 +1,30 @@
 function [res_table]  = eegToEventSignal(EEG,Fs,stage_val,stage_time)
-% EEGTOEVENTSIGNAL proprocess EEG data to extract spindle events and slow oscillations
+%EEGTOEVENTSIGNAL  Preprocess EEG to extract spindle events and slow-oscillation power/phase
 %
-% Input:
-%       - EEG: (double) raw EEG data              -- required
-%       - Fs: (double) sampling frequency in Hz   -- required
-%       - stage_val: (double) stage values 
-%                   where 1,2,3,4,5 represent N3,N2,N1,REM and Wake
-%       - stage_time:(double) corresponding time of the stage
+%   Usage:
+%       res_table = eegToEventSignal(EEG, Fs, stage_val, stage_time)
 %
-% Output: 
-%       -res_table: (table) All event info and signals to use. Key components include:
-%           -- peak_ctimes: detected event central times (s)
-%           -- peak_freqs: detected event frequency (Hz)
-%           -- SOpow: Slow oscillation power
-%           -- SOphase: Slow oscillation phase
+%   Inputs:
+%       EEG        : 1xN double - raw EEG data -- required
+%       Fs         : double - sampling frequency in Hz -- required
+%       stage_val  : 1xS double - stage values (1=N3, 2=N2, 3=N1, 4=REM, 5=Wake) -- required
+%       stage_time : 1xS double - stage onset times (s) -- required
 %
-% Please provide the following citation for all use:
-%       Shuqiang Chen,Mingjian He,Ritchie E. Brown, Uri T. Eden, Michael J Prerau, 
-%       "Individualized Temporal Patterns Drive Human Sleep Spindle Timing"
-%       PNAS, 2025, https://doi.org/10.1073/pnas.2405276121
+%   Outputs:
+%       res_table : table - event info and signals with key columns:
+%           peak_ctimes : detected event central times (s)
+%           peak_freqs  : detected event frequency (Hz)
+%           SOpow       : slow oscillation power (normalized)
+%           SOphase     : slow oscillation phase (rad, unwrapped on input)
 %
-% Last updated, SChen 010725
-% *****************************************************************
+%   Notes:
+%       Pipeline: detect_artifacts -> TF_peak_detection -> compute_SOP
+%       (p2shift1234 norm) -> SO band-pass filter + Hilbert for phase.
+%       Accompanies Chen et al., PNAS 2025.
+%
+%   See also: detect_artifacts, TF_peak_detection, compute_SOP, rawToBinData
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %% Presettings
 

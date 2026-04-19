@@ -1,10 +1,23 @@
 function [SO_phase] = RawPhase2BinPhase(phase_raw,Fs,spindletime_raw,spindletrain,domaindivide)
-%RAWPHASE2BINPHASE transforms raw SO phase to align with binned spindle train
-% s.t. SO phase is the exact value when spindle occurs
-%      SO phase is the cir_mean value when no spindles occurs
-%   Fs is the sampling freq of the raw phase
+%RAWPHASE2BINPHASE  Align raw SO phase to a binned spindle train (exact phase on events, bin mean elsewhere)
 %
-% SChen 040924
+%   Usage:
+%       SO_phase = RawPhase2BinPhase(phase_raw, Fs, spindletime_raw, spindletrain, domaindivide)
+%
+%   Inputs:
+%       phase_raw       : 1xM double - raw SO phase time series (rad, will be unwrapped internally) -- required
+%       Fs              : double - sampling frequency of phase_raw in Hz -- required
+%       spindletime_raw : 1xK double - raw spindle event times (s) -- required
+%       spindletrain    : 1xB double - binned spindle indicator train -- required
+%       domaindivide    : 1x(B+1) double - bin edges in seconds -- required
+%
+%   Outputs:
+%       SO_phase : Bx1 double - binned SO phase; exact raw phase when a spindle occurs in a bin,
+%                  otherwise the circular mean of phase_raw over that bin
+%
+%   See also: rawToBinData, eegToEventSignal, unwrap
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %% SO phase   
 

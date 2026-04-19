@@ -1,18 +1,27 @@
 function [Sp_adj] = FinerModCardinalSpline(ord,c_pt_times_all,s,spline_resol)
-%% Cardinal spline for non-uniform spacing
-% modified cardinal spline in a finer resolution
-% Input: 
-%       -ord, (double): history order 
-%       -c_pt_times_all, (double, vector): knot locations
-%       -s, (double): tension parameter
-%       -spline_resol, (double): this determines spline resolution in evaluation
-% 
-% Ouput: 
-%       -Sp_adj(double,matrix), spline matrix in a finer resolution 
-%                              (in spindle_resol*binsize resolution)
+%FINERMODCARDINALSPLINE  Modified cardinal spline basis on a finer evaluation grid (non-uniform knots)
 %
-% Updated by Shuqiang Chen, 10/17/22
-%************************************************************************************
+%   Usage:
+%       Sp_adj = FinerModCardinalSpline(ord, c_pt_times_all, s, spline_resol)
+%
+%   Inputs:
+%       ord            : integer - history order (number of base bins) -- required
+%       c_pt_times_all : 1xK double - knot locations (bin units) -- required
+%       s              : double - cardinal spline tension parameter -- required
+%       spline_resol   : double - sub-bin spline evaluation resolution -- required
+%
+%   Outputs:
+%       Sp_adj : (ord/spline_resol)xK double - spline basis matrix evaluated at the finer grid
+%
+%   Notes:
+%       Boundary knots use the reflected tangent trick (Sarmashghi et al.,
+%       PLoS One 2021); interior knots use tension-scaled non-uniform
+%       spacing factors. Companion to ModifiedCardinalSpline but on a
+%       spline_resol sub-bin grid.
+%
+%   See also: ModifiedCardinalSpline, plot_hist_curve
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %%
 

@@ -1,13 +1,24 @@
-%% Example script
-% This is the main script to analyze spindle dynamics and output results
+%EXAMPLE_SCRIPT  Run the full spindle-dynamics analysis pipeline on example data and generate summary figures
 %
-% Please provide the following citation for all use:
-%       Shuqiang Chen,Mingjian He,Ritchie E. Brown, Uri T. Eden, Michael J Prerau, 
-%       "Individualized Temporal Patterns Drive Human Sleep Spindle Timing"
-%       PNAS, 2025, https://doi.org/10.1073/pnas.2405276121
+%   Usage:
+%       Example_Script
 %
-% Last updated, SChen 010725
-%******************************************************************************************************************************************
+%   Inputs:
+%       none (loads example_data/example_data1.mat from the repository)
+%
+%   Outputs:
+%       none (side effects only - produces analysis figures)
+%
+%   Notes:
+%       Walks through model specification (specify_mdl), preprocessing
+%       (preprocessToDesignMatrix), Poisson GLM fitting (glmfit), and the
+%       full set of summary plots (history curve, stage preferred phase,
+%       SO-power preferred phase, KS goodness-of-fit, deviance explained).
+%       Accompanies Chen et al., PNAS 2025.
+%
+%   See also: quick_start, specify_mdl, preprocessToDesignMatrix, plot_hist_curve, plot_stage_prefphase, plot_sop_prefphase
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %% PATH SETTINGS
 

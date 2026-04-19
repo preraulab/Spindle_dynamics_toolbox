@@ -1,21 +1,25 @@
 function [dev_exp_sta,dev_exp_sop] = compute_dev_exp(BinData)
-% COMPUTE_DEV_EXP computes proportional deviance explained by each factor
-% By fitting a list of nested models, we can compute the relative contribution of 
-% each factor in modulating spindle dyanmics throught deviance analysis
+%COMPUTE_DEV_EXP  Compute proportional deviance explained by each model factor
 %
-% Input: BinData (struct), all the binned data
-%       
-% Output: 
-%       - dev_exp_sta (double,1x3), deviance explained from [stage, phase, history]
-%       - dev_exp_sop (double,1x3), deviance explained from [SOP, phase, history]
+%   Usage:
+%       [dev_exp_sta, dev_exp_sop] = compute_dev_exp(BinData)
 %
-% Please provide the following citation for all use:
-%       Shuqiang Chen,Mingjian He,Ritchie E. Brown, Uri T. Eden, Michael J Prerau, 
-%       "Individualized Temporal Patterns Drive Human Sleep Spindle Timing"
-%       PNAS, 2025, https://doi.org/10.1073/pnas.2405276121
+%   Inputs:
+%       BinData : struct - all binned data required for the nested model fits -- required
 %
-% Created by SChen 010625
-%***********************************************************************************
+%   Outputs:
+%       dev_exp_sta : 1x3 double - deviance explained from [stage, phase, history]
+%       dev_exp_sop : 1x3 double - deviance explained from [SOP,   phase, history]
+%
+%   Notes:
+%       Fits a sequence of nested Poisson GLMs (null, single-factor, and
+%       three-factor) via glmfit and computes the relative contribution of
+%       each factor to the total deviance reduction. Accompanies Chen et
+%       al., PNAS 2025 (https://doi.org/10.1073/pnas.2405276121).
+%
+%   See also: specify_mdl, build_design_mt, glmfit
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %% Fit all component models
 % SOphase, stage, SOpower,history

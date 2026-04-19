@@ -1,52 +1,34 @@
 function sh = hypnoplot(stage_times,stage_vals,varargin)
-% HYPNOPLOT Make a pretty plot of a hypnogram
+%HYPNOPLOT  Plot a shaded hypnogram (sleep staging over time) with optional artifact bar
 %
 %   Usage:
-%       hyp_handle = hypnoplot(stage_times, stage_vals, <optional arguments>)
+%       hyp_handle = hypnoplot(stage_times, stage_vals, 'Name', Value, ...)
 %
-%   Input:
-%       stage_times: 1xN vector of stage times
-%             NOTE: Assumes each stage time indicates stage ONSET time, with an epoch ranging from
-%             stage_times(t) to stage_times(t+1)
-%       stage_vals: 1xN vector of stage values (6: Artifact 5: Wake, 4:REM, 3:N1, 2:N2, 1:N3, 0:Undefined)
-%             NOTE: Stage are labeled in the plot order of the y-axis, so N1 = 3 and N3 = 1
+%   Inputs:
+%       stage_times : 1xN double - stage onset times; each stage spans stage_times(t) to stage_times(t+1) -- required
+%       stage_vals  : 1xN double - stage codes (6=Art, 5=Wake, 4=REM, 3=N1, 2=N2, 1=N3, 0=Undef) -- required
 %
-%   Optional Name-Value Pairs:
-%       'Artifacts': 1xT logical vector of artifacts, must include EITHER Fs or ArtifactTimes
-%       'Fs': Sampling frequency for artifacts.
-%             NOTE: Assumes time starts at 0, which is the time of the first stage
-%       'ArtifactTimes': 1xT vector of time values for artifacts
-%       'HypnogramLabels': 1x7 cell, stage name labels, default: {'Undef','N3','N2','N1','REM','Wake','Art'}
-%       'LabelPos': 'top' or 'left', label position, default: 'left'
-%       'StageColors': 7x3 double
-%       'GroupNREMColors': logical, use one color for NREM vs different colors for N1-3, default: true
-%       'PlotBuffer': double, axis gap on top/bottom, default: 0.3
+%   Name-Value Pairs:
+%       'Artifacts'       : 1xT logical - artifact mask (requires either Fs or ArtifactTimes) (default: [])
+%       'Fs'              : double - artifact sampling frequency, Hz (default: [])
+%       'ArtifactTimes'   : 1xT double - artifact time values in seconds (default: [])
+%       'HypnogramLabels' : 1x7 cell - stage name labels (default: {'Undef','N3','N2','N1','REM','Wake','Art'})
+%       'LabelPos'        : char - 'top' or 'left' (default: 'left')
+%       'StageColors'     : 7x3 double - color for each stage row
+%       'GroupNREMColors' : logical - one color for NREM (N1-N3) instead of three (default: true)
+%       'PlotBuffer'      : double - vertical padding on top/bottom (default: 0.3)
 %
-%   Output:
-%       hyp_handle: handle to stairs object for hypnogram
+%   Outputs:
+%       hyp_handle : handle - stairs object for the hypnogram trace
 %
 %   Example:
-%       %Simulate a simple hypnogram
 %       stage_vals = [0 0 0 5 5 5 4 3 2 2 2 1 2 1 2 3 5 5 5 1 5 1 2 5 3 2 1 4 4 4 5 4 0 3 2 1 1 5 5 5 0 0 0];
-%       stage_vals(stage_vals <2) = 5;
 %       stage_times = (0:length(stage_vals)-1)*30;
+%       hypnoplot(stage_times, stage_vals);
 %
-%       %Simulate some artifacts
-%       Fs = 200;
-%       dt = 1/Fs;
-%       artifact_times = 0:dt:max(stage_times);
-%       artifacts = rand(size(artifact_times))<.002;
+%   See also: stairs, interp1
 %
-%       figure
-%       subplot(211)
-%       hypnoplot(stage_times, stage_vals, 'Artifacts', artifacts, 'Fs', Fs);
-%       subplot(212)
-%       hypnoplot(stage_times, stage_vals,'HypnogramLabels', {'U','3','2','1','R','W','A'},'LabelPos','top', 'Artifacts', artifacts, 'ArtifactTimes', artifact_times);
-
-%   Copyright 2024 Prerau Lab - http://www.sleepEEG.org
-%   This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
-%   (http://creativecommons.org/licenses/by-nc-sa/4.0/)
-%% ********************************************************************
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %Check for old input
 if isstruct(stage_times)

@@ -1,4 +1,4 @@
-%CLIMSCALE Rescale the color limits of an image to remove outliers with percentiles
+%CLIMSCALE  Rescale the color limits of an image to remove outliers using percentiles
 %
 %   Usage:
 %       clims_new = climscale(hObj, ptiles, outliers)
@@ -7,44 +7,27 @@
 %       climscale(outliers)
 %       climscale(ptiles)
 %
-%   Input:
-%       hObj: handle to axis or image object -- (default: gca)
-%       ptiles: 1x2 double - scaling percentiles (default: [5 98])
-%       outliers: logical - remove outliers prior to scaling using isoutlier (default: true)
+%   Inputs:
+%       hObj     : handle - axis or image object (default: gca)
+%       ptiles   : 1x2 double - scaling percentiles (default: [5 98])
+%       outliers : logical - remove outliers using isoutlier before scaling (default: true)
 %
-%   Output:
-%       clims_new: 1x2 double - scaled caxis limits
+%   Outputs:
+%       clims_new : 1x2 double - scaled caxis limits
 %
 %   Example:
-%       %Create axes and image objects
 %       ax = gca;
 %       hImObj = imagesc(peaks(500));
-%       
-%       %Call with defaults
-%       climscale;
-%       pause(1)
-%       
-%       %Turn off outilers
-%       climscale(false);
-%       pause(1)
-%       
-%       %Set scaling percentiles
-%       climscale([10 90]);
-%       pause(1)
-%       
-%       %Set percentiles and outliers
-%       climscale([5 95],true);
-%       pause(1)
-%       
-%       %Select image objectß
-%       climscale(hImObj, false);
-%       pause(1)
-%       
-%       %Select axis
-%       climscale(ax, true);
-%       
-% Copyright 2024 Michael J. Prerau Laboratory. - http://www.sleepEEG.org
-%**************************************************************************
+%       climscale;                 % defaults
+%       climscale(false);          % outliers off
+%       climscale([10 90]);        % set percentiles
+%       climscale([5 95], true);   % percentiles + outliers
+%       climscale(hImObj, false);  % select image object
+%       climscale(ax, true);       % select axis
+%
+%   See also: caxis, clim, isoutlier
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 function clims_new = climscale(varargin)
 

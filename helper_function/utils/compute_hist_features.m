@@ -1,19 +1,26 @@
 function [hist_features] = compute_hist_features(xlag,yhat,yl,yu)
-%COMPUTE_HIST_FEATURES computes history features from the history curve
-% Input:
-%      -yhat (double): history curve values
-%      -yl (double): 95% CI lower bound
-%      -yu (double): 95% CI upper bound
-% Output:
-%      -hist_features: A struct that has all history features, including
-%          --ref_period： refractory period (s)
-%          --exc_period: excited period(s)
-%          --p_time: peak time (s)
-%          --p_height: peak height
-%          --AUC_is: area under infraslow period (40 - 70) sec
-%       
-% Last updated, SChen 010725
-%******************************************************************************************************************************************
+%COMPUTE_HIST_FEATURES  Compute refractory, excited, and peak features from a history-modulation curve
+%
+%   Usage:
+%       hist_features = compute_hist_features(xlag, yhat, yl, yu)
+%
+%   Inputs:
+%       xlag : nx1 double - history time lag (s) -- required
+%       yhat : nx1 double - history modulation curve (rate multiplier) -- required
+%       yl   : nx1 double - 95 percent CI lower bound -- required
+%       yu   : nx1 double - 95 percent CI upper bound -- required
+%
+%   Outputs:
+%       hist_features : struct with fields
+%           ref_period : refractory period (s) - first time the upper bound exceeds 1 with yhat still < 1
+%           exc_period : excited period (s) - length of the run of yl >= 1 that contains the first valid peak
+%           p_time     : peak time (s)
+%           p_height   : peak height (clamped to <= 1 if no significant peak)
+%           AUC_is     : rate multiplier averaged over the 40-70 s infraslow window (only when xlag spans > 1500 bins)
+%
+%   See also: plot_hist_curve, consecutive_runs, findpeaks
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 %% Compute hist features 
 xbin = xlag(2)-xlag(1);

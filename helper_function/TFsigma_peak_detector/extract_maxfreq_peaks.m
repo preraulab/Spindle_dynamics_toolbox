@@ -1,5 +1,30 @@
 function [ freq_TFpeaks, y, cutoffs ] = extract_maxfreq_peaks(max_curve, bin_centers, MinPeakProm, smoothing_samples, plot_on)
-%Identify the peaks on max frequency distribution density curve
+%EXTRACT_MAXFREQ_PEAKS  Identify peaks on the max-frequency density curve and derive band cutoffs
+%
+%   Usage:
+%       [freq_TFpeaks, y, cutoffs] = extract_maxfreq_peaks(max_curve, bin_centers, MinPeakProm, smoothing_samples, plot_on)
+%
+%   Inputs:
+%       max_curve         : 1xB double - max density curve (events/min) -- required
+%       bin_centers       : 1xB double - frequency bin centers (Hz) -- required
+%       MinPeakProm       : double - minimum peak prominence (default: 0.05)
+%       smoothing_samples : integer - number of samples for Savitzky-Golay smoothing (default: 100)
+%       plot_on           : double - 0 = no plot, 1 = new figure, otherwise handle to target axes (default: false)
+%
+%   Outputs:
+%       freq_TFpeaks : table - detected peaks (peak_freq, peak_lower_freq, peak_upper_freq, peak_prom, peak_height, boundary_from_lastpeak)
+%       y            : 1xB double - smoothed max density curve
+%       cutoffs      : 1x2 double - [slow_cutoff, fast_cutoff] in Hz derived from peak extents
+%
+%   Notes:
+%       Applies a third-order Savitzky-Golay smoother (when
+%       smoothing_samples > 0), runs findpeaks_extents, and selects the most
+%       prominent peak in the 8-10, 10-12, and 12+ Hz bands to derive
+%       cross-band cutoffs with sensible fallbacks.
+%
+%   See also: findpeaks_extents, extract_density_curve, extract_freq_clusters
+%
+%   ∿∿∿  Prerau Laboratory MATLAB Codebase · sleepEEG.org  ∿∿∿
 
 if nargin < 3
     MinPeakProm = 0.05;
